@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using CacheRepository.Configuration;
 using CacheRepository.Indexes;
 using Dapper;
 using DapperExtensions;
@@ -15,32 +16,23 @@ namespace CacheRepository
 {
 	public class Repository
 	{
-		protected readonly ISqlConnectionResolver ConnectionResolver;
-		private readonly Func<dynamic, dynamic> assignNextId;
+		private readonly RepositoryConfig repositoryConfig;
 		private readonly Cache<Type, IIndex> indexesCached;
 		private readonly Cache<Type, List<dynamic>> entitiesCached;
 		private readonly Cache<Type, List<dynamic>> entitiesCachedForBulkInsert;
 		private readonly Cache<Type, dynamic> entityIds;
+		private readonly Cache<Type, string> entitySqlCached;
 
-		protected readonly Cache<Type, string> QueriesCached;
-
-		public Repository(ISqlConnectionResolver connectionResolver, IEnumerable<IIndex> idexes, Func<dynamic, dynamic> assignNextId = null)
+		public Repository(RepositoryConfigBuilder repositoryConfigBuilder)
 		{
-			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
-			if (idexes == null) throw new ArgumentNullException("idexes");
-			this.ConnectionResolver = connectionResolver;
-			this.assignNextId = assignNextId;
-			this.indexesCached = new Cache<Type, IIndex>(idexes.ToDictionary(index => index.GetType(), index => index));
+			if (repositoryConfigBuilder == null) throw new ArgumentNullException("repositoryConfigBuilder");
+			this.repositoryConfig = repositoryConfigBuilder.Build();
+			this.indexesCached = new Cache<Type, IIndex>(repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
-			this.QueriesCached = new Cache<Type, string>();
-
-			if (assignNextId == null)
-			{
-				this.assignNextId = maxId => maxId + 1 ?? 1;
-			}
-
-			this.entityIds = new Cache<Type, dynamic> {OnMissing = key => this.assignNextId(this.getAll(key).Max(x => x.Id))};
+			this.entitySqlCached = new Cache<Type, string>();
+			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => repositoryConfig.NextIdCommand.GetNextId(this.getAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
+			repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
 
 		public IEnumerable<TEntity> GetAll<TEntity>()
@@ -82,22 +74,20 @@ namespace CacheRepository
 
 		public void Flush(IEnumerable<Type> flushOrder = null)
 		{
+			var connection = (SqlConnection) this.repositoryConfig.ConnectionResolver.GetConnection();
+			var tranaction = (SqlTransaction) this.repositoryConfig.ConnectionResolver.GetTransaction();
 			if (flushOrder != null)
 			{
 				flushOrder.Each(type =>
 				                	{
-				                		BulkInsert(type, (SqlConnection) this.ConnectionResolver.GetConnection(),
-				                		           (SqlTransaction) this.ConnectionResolver.GetTransaction(), type.Name,
-				                		           this.entitiesCachedForBulkInsert[type]);
+										BulkInsert(type, connection, tranaction, type.Name,this.entitiesCachedForBulkInsert[type]);
 				                		this.entitiesCachedForBulkInsert.Remove(type);
 				                	});
 			}
 
 			this.entitiesCachedForBulkInsert
-				.Each((type, entityList) =>
-				BulkInsert(type, (SqlConnection)this.ConnectionResolver.GetConnection(),
-						   (SqlTransaction)this.ConnectionResolver.GetTransaction(), type.Name,
-						   entityList));
+			    .Each((type, entityList) =>
+			          BulkInsert(type, connection, tranaction, type.Name, entityList));
 			this.entitiesCachedForBulkInsert.ClearAll();
 		}
 
@@ -108,7 +98,7 @@ namespace CacheRepository
 
 		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class, IEntityWithId
 		{
-			insert(entities, entity => ConnectionResolver.GetConnection().Insert(entity, ConnectionResolver.GetTransaction(), 0));
+			insert(entities, entity => this.repositoryConfig.ConnectionResolver.GetConnection().Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0));
 		}
 
 		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class, IEntityWithId
@@ -119,7 +109,7 @@ namespace CacheRepository
 			entities.Each(entity =>
 			{
 				entity.Id = this.entityIds[type];
-				this.entityIds[type] = this.assignNextId(this.entityIds[type]);
+				this.entityIds[type] = this.repositoryConfig.NextIdCommand.GetNextId(this.entityIds[type]);
 				existingEntities.Add(entity);
 				insertFunction(entity);
 				typeIndexes.Each(index => index.Add(entity));
@@ -129,7 +119,7 @@ namespace CacheRepository
 		public void Update<TEntity>(TEntity entity) where TEntity : class
 		{
 			// what happens if an indexed property gets updated???
-			this.ConnectionResolver.GetConnection().Update(entity, this.ConnectionResolver.GetTransaction());
+			this.repositoryConfig.ConnectionResolver.GetConnection().Update(entity, this.repositoryConfig.ConnectionResolver.GetTransaction());
 		}
 
 		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
@@ -139,17 +129,17 @@ namespace CacheRepository
 
 		public void ExecuteSql(string sql, object parameters = null)
 		{
-			this.ConnectionResolver.GetConnection()
+			this.repositoryConfig.ConnectionResolver.GetConnection()
 				.Execute(
 				sql, 
-				parameters, 
-				this.ConnectionResolver.GetTransaction(),
+				parameters,
+				this.repositoryConfig.ConnectionResolver.GetTransaction(),
 				0);
 		}
 
 		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null)
 		{
-			return this.ConnectionResolver.GetConnection().Query<TEntity>(query, parameters, this.ConnectionResolver.GetTransaction(), true, 0);
+			return this.repositoryConfig.ConnectionResolver.GetConnection().Query<TEntity>(query, parameters, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
 		}
 
 		private List<dynamic> getAllWithGeneric<TEntity>()
@@ -157,10 +147,10 @@ namespace CacheRepository
 			var type = typeof(TEntity);
 			this.entitiesCached.OnMissing = key =>
 			{
-				var connection = this.ConnectionResolver.GetConnection();
-				var transaction = this.ConnectionResolver.GetTransaction();
-				this.QueriesCached.OnMissing = queryKey => "Select * From [{0}]".ToFormat(type.Name);
-				var all = connection.Query<TEntity>(this.QueriesCached[type], null, transaction, true, 0);
+				var connection = this.repositoryConfig.ConnectionResolver.GetConnection();
+				var transaction = this.repositoryConfig.ConnectionResolver.GetTransaction();
+				this.entitySqlCached.OnMissing = entityType => "Select * From [{0}]".ToFormat(type.Name);
+				var all = connection.Query<TEntity>(this.entitySqlCached[type], null, transaction, true, 0);
 				var typeIndexes = this.indexesCached.Where(x => type == x.GetEntityType());
 				all.Each(entity => typeIndexes.Each(index => index.Add(entity)));
 				return all.Cast<dynamic>().ToList();

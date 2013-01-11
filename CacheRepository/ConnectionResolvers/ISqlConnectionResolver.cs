@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace CacheRepository
+namespace CacheRepository.ConnectionResolvers
 {
 	public interface ISqlConnectionResolver
 	{

@@ -50,15 +50,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionResolver.cs" />
+    <Compile Include="Configuration\RepositoryConfig.cs" />
+    <Compile Include="ConnectionResolvers\ConnectionResolver.cs" />
+    <Compile Include="NextIdCommands\IdIsGuid.cs" />
+    <Compile Include="NextIdCommands\IdIsInt.cs" />
+    <Compile Include="NextIdCommands\INextIdCommand.cs" />
+    <Compile Include="ConnectionResolvers\SqlConnectionResolver.cs" />
     <Compile Include="IEntityWithId.cs" />
     <Compile Include="Indexes\IIndex.cs" />
     <Compile Include="Indexes\Index.cs" />
     <Compile Include="Indexes\NonUniqueIndex.cs" />
     <Compile Include="Indexes\UniqueIndex.cs" />
-    <Compile Include="ISqlConnectionResolver.cs" />
+    <Compile Include="ConnectionResolvers\ISqlConnectionResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs" />
+    <Compile Include="Configuration\RepositoryConfigBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
