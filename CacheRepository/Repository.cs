@@ -13,30 +13,33 @@ using FubuCore.Util;
 
 namespace CacheRepository
 {
-	public abstract class Repository
+	public class Repository
 	{
 		protected readonly ISqlConnectionResolver ConnectionResolver;
+		private readonly Func<dynamic, dynamic> assignNextId;
 		private readonly Cache<Type, IIndex> indexesCached;
 		private readonly Cache<Type, List<dynamic>> entitiesCached;
 		private readonly Cache<Type, List<dynamic>> entitiesCachedForBulkInsert;
-		private readonly Cache<Type, int> entityIds;
+		private readonly Cache<Type, dynamic> entityIds;
 
 		protected readonly Cache<Type, string> QueriesCached;
 
-		public Repository(ISqlConnectionResolver connectionResolver, IEnumerable<IIndex> idexes)
+		public Repository(ISqlConnectionResolver connectionResolver, IEnumerable<IIndex> idexes, Func<dynamic, dynamic> assignNextId = null)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			if (idexes == null) throw new ArgumentNullException("idexes");
 			this.ConnectionResolver = connectionResolver;
+			this.assignNextId = assignNextId;
 			this.indexesCached = new Cache<Type, IIndex>(idexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.QueriesCached = new Cache<Type, string>();
-			this.entityIds = new Cache<Type, int> {OnMissing = key =>
-				{
-					var maxId = this.getAll(key).Max(x => x.Id);
-					return maxId + 1 ?? 1;
-				}
-			};
+
+			if (assignNextId == null)
+			{
+				this.assignNextId = maxId => maxId + 1 ?? 1;
+			}
+
+			this.entityIds = new Cache<Type, dynamic> {OnMissing = key => this.assignNextId(this.getAll(key).Max(x => x.Id))};
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 		}
 
@@ -116,7 +119,7 @@ namespace CacheRepository
 			entities.Each(entity =>
 			{
 				entity.Id = this.entityIds[type];
-				this.entityIds[type]++;
+				this.entityIds[type] = this.assignNextId(this.entityIds[type]);
 				existingEntities.Add(entity);
 				insertFunction(entity);
 				typeIndexes.Each(index => index.Add(entity));
@@ -129,7 +132,7 @@ namespace CacheRepository
 			this.ConnectionResolver.GetConnection().Update(entity, this.ConnectionResolver.GetTransaction());
 		}
 
-		public Cache<Type, int> GetHashOfIdsByEntityType()
+		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
 		{
 			return this.entityIds;
 		}

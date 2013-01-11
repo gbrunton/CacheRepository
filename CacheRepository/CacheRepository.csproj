@@ -50,7 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityWithId.cs" />
+    <Compile Include="ConnectionResolver.cs" />
     <Compile Include="IEntityWithId.cs" />
     <Compile Include="Indexes\IIndex.cs" />
     <Compile Include="Indexes\Index.cs" />
