@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\EntityIdIsAssigned.cs" />
     <Compile Include="Configuration\RepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\ConnectionResolver.cs" />
     <Compile Include="NextIdCommands\IdIsGuid.cs" />

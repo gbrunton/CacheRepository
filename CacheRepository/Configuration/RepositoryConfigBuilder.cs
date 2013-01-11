@@ -23,6 +23,7 @@ namespace CacheRepository.Configuration
 
 		internal RepositoryConfig Build()
 		{
+			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
 			return new RepositoryConfig(this.connectionResolver, this.indexes, this.nextIdCommand, this.customEntitySql);
 		}
 

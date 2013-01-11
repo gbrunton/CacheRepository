@@ -119,6 +119,7 @@ namespace CacheRepository
 		public void Update<TEntity>(TEntity entity) where TEntity : class
 		{
 			// what happens if an indexed property gets updated???
+			// See Issue #2
 			this.repositoryConfig.ConnectionResolver.GetConnection().Update(entity, this.repositoryConfig.ConnectionResolver.GetTransaction());
 		}
 
