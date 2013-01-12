@@ -1,6 +1,6 @@
-﻿namespace CacheRepository.NextIdCommands
+﻿namespace CacheRepository.NextIdStrategies
 {
-	public class IdIsInt : INextIdCommand
+	public class IdIsInt : INextIdStrategy
 	{
 		public dynamic GetNextId(dynamic currentMaxId)
 		{

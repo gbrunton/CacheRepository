@@ -30,7 +30,7 @@ namespace CacheRepository
 			this.indexesCached = new Cache<Type, IIndex>(repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.entitySqlCached = new Cache<Type, string>();
-			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => repositoryConfig.NextIdCommand.GetNextId(this.getAll(key).Max(x => x.Id)) };
+			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => repositoryConfig.NextIdStrategy.GetNextId(this.getAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 			repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
@@ -51,7 +51,7 @@ namespace CacheRepository
 			return index;
 		}
 
-		public void BuilkInsertNonGeneric(IEntityWithId entity)
+		public void BuilkInsertNonGeneric(object entity)
 		{
 			var typeOfEntity = entity.GetType();
 			var methodInfo = typeof(Repository).GetMethods().First(x => x.Name == "BulkInsert");
@@ -61,12 +61,12 @@ namespace CacheRepository
 			generic.Invoke(this, new object[]{parameter});
 		}
 
-		public void BulkInsert<TEntity>(params TEntity[] entities) where TEntity : class, IEntityWithId
+		public void BulkInsert<TEntity>(params TEntity[] entities) where TEntity : class
 		{
 			this.BulkInsert((IEnumerable<TEntity>)entities);
 		}
 
-		public void BulkInsert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class, IEntityWithId
+		public void BulkInsert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
 			var type = typeof (TEntity);
 			this.insert(entities, entity => this.entitiesCachedForBulkInsert[type].Add(entity));
@@ -91,25 +91,27 @@ namespace CacheRepository
 			this.entitiesCachedForBulkInsert.ClearAll();
 		}
 
-		public void Insert<TEntity>(params TEntity[] entities) where TEntity : class, IEntityWithId
+		public void Insert<TEntity>(params TEntity[] entities) where TEntity : class
 		{
 			this.Insert((IEnumerable<TEntity>)entities);
 		}
 
-		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class, IEntityWithId
+		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
-			insert(entities, entity => this.repositoryConfig.ConnectionResolver.GetConnection().Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0));
+			insert(entities, entity => 
+				this.repositoryConfig.ConnectionResolver.GetConnection().Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0));
 		}
 
-		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class, IEntityWithId
+		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class
 		{
 			var type = typeof(TEntity);
 			var existingEntities = this.getAllWithGeneric<TEntity>();
 			var typeIndexes = this.indexesCached.Where(x => type == x.GetEntityType());
 			entities.Each(entity =>
 			{
-				entity.Id = this.entityIds[type];
-				this.entityIds[type] = this.repositoryConfig.NextIdCommand.GetNextId(this.entityIds[type]);
+				var id = this.entityIds[type];
+				this.repositoryConfig.SetIdStrategy.SetId(id, entity);
+				this.entityIds[type] = this.repositoryConfig.NextIdStrategy.GetNextId(id);
 				existingEntities.Add(entity);
 				insertFunction(entity);
 				typeIndexes.Each(index => index.Add(entity));

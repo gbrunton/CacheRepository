@@ -3,7 +3,7 @@ using System.Data;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class ConnectionResolver : ISqlConnectionResolver, IDisposable
+	public class ConnectionResolver : ISqlConnectionResolver
 	{
 		private readonly IDbConnection connection;
 		private IDbTransaction transaction;
@@ -31,7 +31,6 @@ namespace CacheRepository.ConnectionResolvers
 
 		public void Dispose()
 		{
-			this.transaction.Commit();
 			this.transaction.Dispose();
 			this.connection.Dispose();
 		}	

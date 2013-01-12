@@ -4,7 +4,7 @@ using DapperExtensions.Mapper;
 
 namespace CacheRepository.Configuration
 {
-	public class EntityIdIsAssigned<TEntityWithId> : AutoClassMapper<TEntityWithId> where TEntityWithId : class, IEntityWithId
+	public class EntityIdIsAssigned<TEntityWithId> : AutoClassMapper<TEntityWithId> where TEntityWithId : class
 	{
 		protected override void AutoMap()
 		{

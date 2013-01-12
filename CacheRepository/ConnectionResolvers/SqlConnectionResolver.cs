@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class SqlConnectionResolver : ISqlConnectionResolver, IDisposable
+	public class SqlConnectionResolver : ISqlConnectionResolver
 	{
 		private readonly ConnectionResolver connectionResolver;
 

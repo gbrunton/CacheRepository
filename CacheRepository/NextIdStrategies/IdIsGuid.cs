@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace CacheRepository.NextIdCommands
+namespace CacheRepository.NextIdStrategies
 {
-	public class IdIsGuid : INextIdCommand
+	public class IdIsGuid : INextIdStrategy
 	{
 		public dynamic GetNextId(dynamic currentMaxId)
 		{
