@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CacheRepository.BulkInsertStrategies;
 using CacheRepository.ConnectionResolvers;
 using CacheRepository.Indexes;
 using CacheRepository.NextIdStrategies;
@@ -14,6 +15,7 @@ namespace CacheRepository.Configuration
 		private readonly List<Tuple<Type, string>> customEntitySql;
 		private INextIdStrategy nextIdStrategy;
 		private ISetIdStrategy setIdStrategy;
+		private IBulkInsertStrategy bulkInsertStratgy;
 
 		public RepositoryConfigBuilder(ISqlConnectionResolver connectionResolver)
 		{
@@ -22,11 +24,14 @@ namespace CacheRepository.Configuration
 			this.customEntitySql = new List<Tuple<Type, string>>();
 			this.nextIdStrategy = new IdDoesNotExist();
 			this.setIdStrategy = new EntityHasNoIdSetter();
+			this.bulkInsertStratgy = new SqlServerBulkInsert();
 		}
 
 		internal RepositoryConfig Build()
 		{
 			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
+
+			this.bulkInsertStratgy.ConnectionResolver = this.connectionResolver;
 
 			return new RepositoryConfig
 				(
@@ -34,7 +39,8 @@ namespace CacheRepository.Configuration
 					this.indexes, 
 					this.nextIdStrategy, 
 					this.customEntitySql,
-					this.setIdStrategy
+					this.setIdStrategy,
+					this.bulkInsertStratgy
 				);
 		}
 

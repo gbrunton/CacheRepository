@@ -74,20 +74,18 @@ namespace CacheRepository
 
 		public void Flush(IEnumerable<Type> flushOrder = null)
 		{
-			var connection = (SqlConnection) this.repositoryConfig.ConnectionResolver.GetConnection();
-			var tranaction = (SqlTransaction) this.repositoryConfig.ConnectionResolver.GetTransaction();
 			if (flushOrder != null)
 			{
 				flushOrder.Each(type =>
-				                	{
-										BulkInsert(type, connection, tranaction, type.Name,this.entitiesCachedForBulkInsert[type]);
-				                		this.entitiesCachedForBulkInsert.Remove(type);
-				                	});
+					{
+						this.repositoryConfig.BulkInsertStrategy.Insert(type, this.entitiesCachedForBulkInsert[type]);
+						this.entitiesCachedForBulkInsert.Remove(type);
+					});
 			}
 
 			this.entitiesCachedForBulkInsert
 			    .Each((type, entityList) =>
-			          BulkInsert(type, connection, tranaction, type.Name, entityList));
+			          this.repositoryConfig.BulkInsertStrategy.Insert(type, this.entitiesCachedForBulkInsert[type]));
 			this.entitiesCachedForBulkInsert.ClearAll();
 		}
 
@@ -167,43 +165,5 @@ namespace CacheRepository
 			var generic = methodInfo.MakeGenericMethod(type);
 			return (List<dynamic>)generic.Invoke(this, null);
 		}
-
-		// I got this from here:
-		// http://elegantcode.com/2012/01/26/sqlbulkcopy-for-generic-listt-useful-for-entity-framework-nhibernate/
-		private static void BulkInsert(Type typeOfEntity, SqlConnection connection, SqlTransaction transaction, string tableName, IList<dynamic> list)
-		{
-			using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.KeepNulls | SqlBulkCopyOptions.CheckConstraints, transaction))
-			{
-				bulkCopy.BulkCopyTimeout = 0;
-				bulkCopy.BatchSize = list.Count;
-				bulkCopy.DestinationTableName = tableName;
-
-				var table = new DataTable();
-				var props = TypeDescriptor.GetProperties(typeOfEntity)
-					//Dirty hack to make sure we only have system data types 
-					//i.e. filter out the relationships/collections
-										   .Cast<PropertyDescriptor>()
-										   .Where(propertyInfo => propertyInfo.PropertyType.Namespace.Equals("System"))
-										   .ToArray();
-
-				foreach (var propertyInfo in props)
-				{
-					bulkCopy.ColumnMappings.Add(propertyInfo.Name, propertyInfo.Name);
-					table.Columns.Add(propertyInfo.Name, Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType);
-				}
-
-				var values = new object[props.Length];
-				foreach (var item in list)
-				{
-					for (var i = 0; i < values.Length; i++)
-					{
-						values[i] = props[i].GetValue(item);
-					}
-
-					table.Rows.Add(values);
-				}
-
-				bulkCopy.WriteToServer(table);
-			}
-		}
-	}}
+	}
+}

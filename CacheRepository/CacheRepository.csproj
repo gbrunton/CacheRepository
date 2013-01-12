@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BulkInsertStrategies\IBulkInsertStrategy.cs" />
+    <Compile Include="BulkInsertStrategies\SqlServerBulkInsert.cs" />
     <Compile Include="Configuration\EntityIdIsAssigned.cs" />
     <Compile Include="Configuration\RepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\ConnectionResolver.cs" />
