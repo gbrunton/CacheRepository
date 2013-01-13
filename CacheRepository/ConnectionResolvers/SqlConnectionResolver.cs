@@ -1,32 +1,38 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class SqlConnectionResolver : ISqlConnectionResolver
+	public class SqlConnectionResolver : IDisposable
 	{
-		private readonly ConnectionResolver connectionResolver;
+		private readonly IDbConnection connection;
+		private IDbTransaction transaction;
 
-		public SqlConnectionResolver(string connectionString)
+		public SqlConnectionResolver(IDbConnection connection)
 		{
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
-			this.connectionResolver = new ConnectionResolver(new SqlConnection(connectionString));
+			if (connection == null) throw new ArgumentNullException("connection");
+			this.connection = connection;
 		}
 
 		public IDbConnection GetConnection()
 		{
-			return this.connectionResolver.GetConnection();
+			if (this.connection.State != ConnectionState.Open)
+			{
+				this.connection.Open();
+				this.transaction = connection.BeginTransaction();
+			}
+			return connection;
 		}
 
 		public IDbTransaction GetTransaction()
 		{
-			return this.connectionResolver.GetTransaction();
+			return this.transaction;
 		}
 
 		public void Dispose()
 		{
-			this.connectionResolver.Dispose();
+			this.transaction.Dispose();
+			this.connection.Dispose();
 		}
 	}
 }

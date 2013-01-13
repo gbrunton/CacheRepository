@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CacheRepository.Configuration;
+using CacheRepository.Configuration.Configs;
 using CacheRepository.Indexes;
-using Dapper;
 using FubuCore.Util;
 
-namespace CacheRepository
+namespace CacheRepository.Repositories
 {
-	public class Repository
+	public abstract class Repository
 	{
 		private readonly RepositoryConfig repositoryConfig;
 		private readonly Cache<Type, IIndex> indexesCached;
@@ -18,16 +17,16 @@ namespace CacheRepository
 		private readonly Cache<Type, dynamic> entityIds;
 		private readonly Cache<Type, string> entitySqlCached;
 
-		public Repository(RepositoryConfigBuilder repositoryConfigBuilder)
+		protected Repository(RepositoryConfig repositoryConfig)
 		{
-			if (repositoryConfigBuilder == null) throw new ArgumentNullException("repositoryConfigBuilder");
-			this.repositoryConfig = repositoryConfigBuilder.Build();
-			this.indexesCached = new Cache<Type, IIndex>(repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
+			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
+			this.repositoryConfig = repositoryConfig;
+			this.indexesCached = new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
-			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => repositoryConfig.NextIdStrategy.GetNextId(this.getAll(key).Max(x => x.Id)) };
+			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(this.getAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
-			repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
+			this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
 
 		public IEnumerable<TEntity> GetAll<TEntity>() where TEntity : class 
@@ -119,21 +118,6 @@ namespace CacheRepository
 		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
 		{
 			return this.entityIds;
-		}
-
-		public void ExecuteSql(string sql, object parameters = null)
-		{
-			this.repositoryConfig.ConnectionResolver.GetConnection()
-				.Execute(
-				sql, 
-				parameters,
-				this.repositoryConfig.ConnectionResolver.GetTransaction(),
-				0);
-		}
-
-		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null)
-		{
-			return this.repositoryConfig.ConnectionResolver.GetConnection().Query<TEntity>(query, parameters, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
 		}
 
 		private List<dynamic> getAllWithGeneric<TEntity>() where TEntity : class 
