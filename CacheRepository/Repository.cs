@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using CacheRepository.Configuration;
 using CacheRepository.Indexes;
 using Dapper;
-using DapperExtensions;
-using FubuCore;
 using FubuCore.Util;
 
 namespace CacheRepository
@@ -29,13 +24,13 @@ namespace CacheRepository
 			this.repositoryConfig = repositoryConfigBuilder.Build();
 			this.indexesCached = new Cache<Type, IIndex>(repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
-			this.entitySqlCached = new Cache<Type, string>();
+			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
 			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => repositoryConfig.NextIdStrategy.GetNextId(this.getAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 			repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
 
-		public IEnumerable<TEntity> GetAll<TEntity>()
+		public IEnumerable<TEntity> GetAll<TEntity>() where TEntity : class 
 		{
 			return getAllWithGeneric<TEntity>().Cast<TEntity>();
 		}
@@ -96,8 +91,8 @@ namespace CacheRepository
 
 		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
-			insert(entities, entity => 
-				this.repositoryConfig.ConnectionResolver.GetConnection().Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0));
+			insert(entities, entity =>
+			                 this.repositoryConfig.InsertStrategy.Insert(entity));
 		}
 
 		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class
@@ -118,9 +113,7 @@ namespace CacheRepository
 
 		public void Update<TEntity>(TEntity entity) where TEntity : class
 		{
-			// what happens if an indexed property gets updated???
-			// See Issue #2
-			this.repositoryConfig.ConnectionResolver.GetConnection().Update(entity, this.repositoryConfig.ConnectionResolver.GetTransaction());
+			this.repositoryConfig.UpdateStrategy.Update(entity);
 		}
 
 		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
@@ -143,18 +136,22 @@ namespace CacheRepository
 			return this.repositoryConfig.ConnectionResolver.GetConnection().Query<TEntity>(query, parameters, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
 		}
 
-		private List<dynamic> getAllWithGeneric<TEntity>()
+		private List<dynamic> getAllWithGeneric<TEntity>() where TEntity : class 
 		{
 			var type = typeof(TEntity);
 			this.entitiesCached.OnMissing = key =>
 			{
-				var connection = this.repositoryConfig.ConnectionResolver.GetConnection();
-				var transaction = this.repositoryConfig.ConnectionResolver.GetTransaction();
-				this.entitySqlCached.OnMissing = entityType => "Select * From [{0}]".ToFormat(type.Name);
-				var all = connection.Query<TEntity>(this.entitySqlCached[type], null, transaction, true, 0);
+				var all = this.repositoryConfig
+					.EntityRetrieverStrategy
+					.GetAll<TEntity>(this.entitySqlCached[type]);
 				var typeIndexes = this.indexesCached.Where(x => type == x.GetEntityType());
-				all.Each(entity => typeIndexes.Each(index => index.Add(entity)));
-				return all.Cast<dynamic>().ToList();
+				var returnList = new List<dynamic>();
+				all.Each(entity =>
+					{
+						typeIndexes.Each(index => index.Add(entity));
+						returnList.Add(entity);
+					});
+				return returnList;
 			};
 			return this.entitiesCached[type];
 		}

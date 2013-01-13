@@ -55,6 +55,10 @@
     <Compile Include="Configuration\EntityIdIsAssigned.cs" />
     <Compile Include="Configuration\RepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\ConnectionResolver.cs" />
+    <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
+    <Compile Include="EntityRetrieverStrategies\SqlEntityRetrieverStrategy.cs" />
+    <Compile Include="InsertStrategies\IInsertStrategy.cs" />
+    <Compile Include="InsertStrategies\SqlInsert.cs" />
     <Compile Include="NextIdStrategies\IdDoesNotExist.cs" />
     <Compile Include="NextIdStrategies\IdIsGuid.cs" />
     <Compile Include="NextIdStrategies\IdIsInt.cs" />
@@ -71,6 +75,8 @@
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasNoIdSetter.cs" />
     <Compile Include="SetIdStrategy\ISetIdStrategy.cs" />
+    <Compile Include="UpdateStrategies\IUpdateStrategy.cs" />
+    <Compile Include="UpdateStrategies\SqlUpdate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

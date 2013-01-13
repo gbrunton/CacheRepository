@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using CacheRepository.BulkInsertStrategies;
 using CacheRepository.ConnectionResolvers;
+using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.Indexes;
+using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.SetIdStrategy;
+using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration
 {
@@ -17,7 +20,10 @@ namespace CacheRepository.Configuration
 				INextIdStrategy nextIdStrategy, 
 				List<Tuple<Type, string>> customEntitySql, 
 				ISetIdStrategy setIdStrategy,
-				IBulkInsertStrategy bulkInsertStrategy
+				IBulkInsertStrategy bulkInsertStrategy,
+				IInsertStrategy insertStrategy,
+				IUpdateStrategy updateStrategy,
+				IEntityRetrieverStrategy entityRetrieverStrategy
 			)
 		{
 			ConnectionResolver = sqlConnectionResolver;
@@ -26,6 +32,9 @@ namespace CacheRepository.Configuration
 			CustomEntitySql = customEntitySql;
 			SetIdStrategy = setIdStrategy;
 			BulkInsertStrategy = bulkInsertStrategy;
+			InsertStrategy = insertStrategy;
+			UpdateStrategy = updateStrategy;
+			EntityRetrieverStrategy = entityRetrieverStrategy;
 		}
 
 		public ISqlConnectionResolver ConnectionResolver { get; private set; }
@@ -34,5 +43,8 @@ namespace CacheRepository.Configuration
 		public List<Tuple<Type, string>> CustomEntitySql { get; private set; }
 		public ISetIdStrategy SetIdStrategy { get; private set; }
 		public IBulkInsertStrategy BulkInsertStrategy { get; private set; }
+		public IInsertStrategy InsertStrategy { get; private set; }
+		public IUpdateStrategy UpdateStrategy { get; private set; }
+		public IEntityRetrieverStrategy EntityRetrieverStrategy { get; private set; }
 	}
 }

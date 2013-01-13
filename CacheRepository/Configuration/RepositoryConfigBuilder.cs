@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using CacheRepository.BulkInsertStrategies;
 using CacheRepository.ConnectionResolvers;
+using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.Indexes;
+using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.SetIdStrategy;
+using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration
 {
@@ -16,6 +19,9 @@ namespace CacheRepository.Configuration
 		private INextIdStrategy nextIdStrategy;
 		private ISetIdStrategy setIdStrategy;
 		private IBulkInsertStrategy bulkInsertStratgy;
+		private IInsertStrategy insertStrategy;
+		private IUpdateStrategy updateStrategy;
+		private IEntityRetrieverStrategy entityRetrieverStrategy;
 
 		public RepositoryConfigBuilder(ISqlConnectionResolver connectionResolver)
 		{
@@ -25,13 +31,17 @@ namespace CacheRepository.Configuration
 			this.nextIdStrategy = new IdDoesNotExist();
 			this.setIdStrategy = new EntityHasNoIdSetter();
 			this.bulkInsertStratgy = new SqlServerBulkInsert();
+			this.insertStrategy = new SqlInsert();
+			this.updateStrategy = new SqlUpdate();
+			this.entityRetrieverStrategy = new SqlEntityRetrieverStrategy();
 		}
 
 		internal RepositoryConfig Build()
 		{
-			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
-
 			this.bulkInsertStratgy.ConnectionResolver = this.connectionResolver;
+			this.insertStrategy.ConnectionResolver = this.connectionResolver;
+			this.updateStrategy.ConnectionResolver = this.connectionResolver;
+			this.entityRetrieverStrategy.ConnectionResolver = this.connectionResolver;
 
 			return new RepositoryConfig
 				(
@@ -40,7 +50,10 @@ namespace CacheRepository.Configuration
 					this.nextIdStrategy, 
 					this.customEntitySql,
 					this.setIdStrategy,
-					this.bulkInsertStratgy
+					this.bulkInsertStratgy,
+					this.insertStrategy,
+					this.updateStrategy,
+					this.entityRetrieverStrategy
 				);
 		}
 
