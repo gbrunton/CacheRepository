@@ -15,7 +15,7 @@ namespace CacheRepository.ConnectionResolvers
 			this.streamReaderCache = new Cache<string, StreamReader>
 				{
 					OnMissing = name =>
-						File.OpenText(Path.Combine(rootPathFolder, name, fileRepositoryConfig.FileExtension))
+						File.OpenText(Path.Combine(rootPathFolder, name + fileRepositoryConfig.FileExtension))
 				};
 		}
 
