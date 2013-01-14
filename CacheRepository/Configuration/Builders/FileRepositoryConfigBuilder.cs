@@ -6,21 +6,23 @@ using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.FileEntityFactoryStrategies;
 using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
+using CacheRepository.Repositories;
 using CacheRepository.SetIdStrategy;
 using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration.Builders
 {
-	public class FileRepositoryConfigBuilder : RepositoryConfigBuilder<FileRepositoryConfigBuilder, FileRepositoryConfig>
+	public class FileRepositoryConfigBuilder 
+		: RepositoryConfigBuilder<FileRepositoryConfigBuilder, FileRepositoryConfig, FileConnectionResolver, FileRepository>
 	{
-		private readonly FileConnectionResolver fileConnectionResolver;
+		private readonly string rootPathFolder;
 		private string fileExtension;
-		private ConstructorContainsLine fileEntityFactoryStrategy;
+		private IFileEntityFactoryStrategy fileEntityFactoryStrategy;
 
-		public FileRepositoryConfigBuilder(FileConnectionResolver fileConnectionResolver) 
+		public FileRepositoryConfigBuilder(string rootPathFolder) 
 		{
-			if (fileConnectionResolver == null) throw new ArgumentNullException("fileConnectionResolver");
-			this.fileConnectionResolver = fileConnectionResolver;
+			if (rootPathFolder == null) throw new ArgumentNullException("rootPathFolder");
+			this.rootPathFolder = rootPathFolder;
 			this.fileExtension = ".txt";
 			this.fileEntityFactoryStrategy = new ConstructorContainsLine();
 			base.WithNextIdStrategy(new IdDoesNotExist());
@@ -47,11 +49,15 @@ namespace CacheRepository.Configuration.Builders
 			return new FileEntityRetrieverStrategy(repositoryConfig);
 		}
 
+		protected override FileConnectionResolver GetConnectionResolver(FileRepositoryConfig repositoryConfig)
+		{
+			return new FileConnectionResolver(this.rootPathFolder, repositoryConfig);
+		}
+
 		public override FileRepositoryConfig Build()
 		{
 			var repositoryConfig = new FileRepositoryConfig
 				{
-					FileConnectionResolver = this.fileConnectionResolver,
 					FileExtension = this.fileExtension,
 					FileEntityFactoryStrategy = this.fileEntityFactoryStrategy
 				};
@@ -67,6 +73,12 @@ namespace CacheRepository.Configuration.Builders
 		public FileRepositoryConfigBuilder WithFileExtension(string newValue)
 		{
 			this.fileExtension = newValue;
+			return this;
+		}
+
+		public FileRepositoryConfigBuilder WithFileEntityFactory(IFileEntityFactoryStrategy newValue)
+		{
+			this.fileEntityFactoryStrategy = newValue;
 			return this;
 		}
 	}

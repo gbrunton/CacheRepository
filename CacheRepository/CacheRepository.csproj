@@ -59,6 +59,7 @@
     <Compile Include="Configuration\Builders\SqlRepositoryConfigBuilder.cs" />
     <Compile Include="Configuration\Configs\SqlRepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\FileConnectionResolver.cs" />
+    <Compile Include="ConnectionResolvers\IConnectionResolver.cs" />
     <Compile Include="EntityRetrieverStrategies\FileEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\SqlEntityRetrieverStrategy.cs" />

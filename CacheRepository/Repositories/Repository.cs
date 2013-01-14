@@ -8,7 +8,7 @@ using FubuCore.Util;
 
 namespace CacheRepository.Repositories
 {
-	public abstract class Repository
+	public abstract class Repository : IDisposable
 	{
 		private readonly IRepositoryConfig repositoryConfig;
 		protected readonly Cache<Type, IIndex> IndexesCached;
@@ -75,6 +75,11 @@ namespace CacheRepository.Repositories
 			var methodInfo = typeof(Repository).GetMethod("GetAllWithGeneric", BindingFlags.NonPublic | BindingFlags.Instance);
 			var generic = methodInfo.MakeGenericMethod(type);
 			return (List<dynamic>)generic.Invoke(this, null);
+		}
+
+		public void Dispose()
+		{
+			this.repositoryConfig.GetConnectionResolver().Dispose();
 		}
 	}
 }

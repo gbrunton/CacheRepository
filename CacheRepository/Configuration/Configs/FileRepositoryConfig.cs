@@ -4,11 +4,10 @@ using CacheRepository.Repositories;
 
 namespace CacheRepository.Configuration.Configs
 {
-	public class FileRepositoryConfig : RepositoryConfig<FileRepository>
+	public class FileRepositoryConfig : RepositoryConfig<FileRepository, FileConnectionResolver>
 	{
 		internal FileRepositoryConfig() {}
 
-		public FileConnectionResolver FileConnectionResolver { get; set; }
 		public string FileExtension { get; set; }
 		public IFileEntityFactoryStrategy FileEntityFactoryStrategy { get; set; }
 

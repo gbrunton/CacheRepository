@@ -20,9 +20,9 @@ namespace CacheRepository.InsertStrategies
 		{
 			var defaultMapper = DapperExtensions.DapperExtensions.DefaultMapper;
 			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
-			this.repositoryConfig.SqlConnectionResolver
+			this.repositoryConfig.ConnectionResolver
 				.GetConnection()
-				.Insert(entity, this.repositoryConfig.SqlConnectionResolver.GetTransaction(), 0);
+				.Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0);
 			DapperExtensions.DapperExtensions.DefaultMapper = defaultMapper;
 		}
 	}

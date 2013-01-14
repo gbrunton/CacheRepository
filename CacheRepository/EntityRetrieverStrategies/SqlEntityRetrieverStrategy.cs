@@ -21,9 +21,10 @@ namespace CacheRepository.EntityRetrieverStrategies
 			queryString = string.IsNullOrEmpty(queryString)
 							  ? "Select * From [{0}]".ToFormat(typeof(TEntity).Name)
 				              : queryString;
-			return this.repositoryConfig.SqlConnectionResolver
+			return this.repositoryConfig
+				.ConnectionResolver
 				.GetConnection()
-				.Query<TEntity>(queryString, null, this.repositoryConfig.SqlConnectionResolver.GetTransaction(), true, 0);
+				.Query<TEntity>(queryString, null, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
 		}
 	}
 }

@@ -18,9 +18,9 @@ namespace CacheRepository.UpdateStrategies
 		{
 			// what happens if an indexed property gets updated???
 			// See Issue #2
-			this.repositoryConfig.SqlConnectionResolver
+			this.repositoryConfig.ConnectionResolver
 				.GetConnection()
-				.Update(entity, this.repositoryConfig.SqlConnectionResolver.GetTransaction());
+				.Update(entity, this.repositoryConfig.ConnectionResolver.GetTransaction());
 		}
 	}
 }

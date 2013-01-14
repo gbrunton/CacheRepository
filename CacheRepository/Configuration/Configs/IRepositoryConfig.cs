@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CacheRepository.BulkInsertStrategies;
+using CacheRepository.ConnectionResolvers;
 using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.Indexes;
 using CacheRepository.InsertStrategies;
@@ -20,5 +21,6 @@ namespace CacheRepository.Configuration.Configs
 		IInsertStrategy InsertStrategy { get; set; }
 		IUpdateStrategy UpdateStrategy { get; set; }
 		IEntityRetrieverStrategy EntityRetrieverStrategy { get; set; }
+		IConnectionResolver GetConnectionResolver();
 	}
 }

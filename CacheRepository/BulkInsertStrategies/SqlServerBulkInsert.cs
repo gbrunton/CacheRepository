@@ -23,8 +23,8 @@ namespace CacheRepository.BulkInsertStrategies
 			BulkInsert
 				(
 					type,
-					(SqlConnection)this.repositoryConfig.SqlConnectionResolver.GetConnection(),
-					(SqlTransaction)this.repositoryConfig.SqlConnectionResolver.GetTransaction(), 
+					(SqlConnection)this.repositoryConfig.ConnectionResolver.GetConnection(),
+					(SqlTransaction)this.repositoryConfig.ConnectionResolver.GetTransaction(), 
 					type.Name,
 			        entities
 				);

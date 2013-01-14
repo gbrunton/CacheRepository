@@ -5,23 +5,19 @@ using FubuCore.Util;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class FileConnectionResolver : IDisposable
+	public class FileConnectionResolver : IConnectionResolver
 	{
 		private readonly Cache<string, StreamReader> streamReaderCache;
 
-		public FileConnectionResolver(string rootPathFolder)
+		internal FileConnectionResolver(string rootPathFolder, FileRepositoryConfig fileRepositoryConfig)
 		{
 			if (rootPathFolder == null) throw new ArgumentNullException("rootPathFolder");
 			this.streamReaderCache = new Cache<string, StreamReader>
 				{
 					OnMissing = name =>
-						File.OpenText(Path.Combine(rootPathFolder, name, this.FileRepositoryConfig.FileExtension))
+						File.OpenText(Path.Combine(rootPathFolder, name, fileRepositoryConfig.FileExtension))
 				};
 		}
-
-		// TODO: When I make the repository implement IDisposible and not make consumers of this lib to new up
-		// ConnectionResolvers, I'll be able to just inject the following into the constructor
-		public FileRepositoryConfig FileRepositoryConfig { get; set; }
 
 		public StreamReader GetFile(string name)
 		{

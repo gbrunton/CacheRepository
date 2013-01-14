@@ -36,7 +36,7 @@ namespace CacheRepository.Repositories
 			this.insert(entities, entity => this.EntitiesCachedForBulkInsert[type].Add(entity));
 		}
 
-		public void Flush(IEnumerable<Type> flushOrder = null)
+		public void BulkInsertFlush(IEnumerable<Type> flushOrder = null)
 		{
 			if (flushOrder != null)
 			{
@@ -87,21 +87,26 @@ namespace CacheRepository.Repositories
 
 		public void ExecuteSql(string sql, object parameters = null)
 		{
-			this.repositoryConfig.SqlConnectionResolver.GetConnection()
+			this.repositoryConfig.ConnectionResolver.GetConnection()
 				.Execute(
 				sql,
 				parameters,
-				this.repositoryConfig.SqlConnectionResolver.GetTransaction(),
+				this.repositoryConfig.ConnectionResolver.GetTransaction(),
 				0);
 		}
 
 		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null)
 		{
 			return this.repositoryConfig
-				.SqlConnectionResolver
+				.ConnectionResolver
 				.GetConnection()
 				.Query<TEntity>
-					(query, parameters, this.repositoryConfig.SqlConnectionResolver.GetTransaction(), true, 0);
+					(query, parameters, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
+		}
+
+		public void Commit()
+		{
+			this.repositoryConfig.ConnectionResolver.Commit();
 		}
 	}
 }

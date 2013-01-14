@@ -18,7 +18,7 @@ namespace CacheRepository.EntityRetrieverStrategies
 		{
 			var entities = new List<dynamic>();
 			var factory = this.repositoryConfig.FileEntityFactoryStrategy;
-			var file = this.repositoryConfig.FileConnectionResolver.GetFile(typeof (TEntity).Name);
+			var file = this.repositoryConfig.ConnectionResolver.GetFile(typeof (TEntity).Name);
 			while (true)
 			{
 				var line = file.ReadLine();

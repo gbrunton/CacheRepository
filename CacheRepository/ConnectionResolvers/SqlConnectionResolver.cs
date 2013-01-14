@@ -3,12 +3,12 @@ using System.Data;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class SqlConnectionResolver : IDisposable
+	public class SqlConnectionResolver : IConnectionResolver
 	{
 		private readonly IDbConnection connection;
 		private IDbTransaction transaction;
 
-		public SqlConnectionResolver(IDbConnection connection)
+		internal SqlConnectionResolver(IDbConnection connection)
 		{
 			if (connection == null) throw new ArgumentNullException("connection");
 			this.connection = connection;
@@ -33,6 +33,11 @@ namespace CacheRepository.ConnectionResolvers
 		{
 			this.transaction.Dispose();
 			this.connection.Dispose();
+		}
+
+		public void Commit()
+		{
+			this.transaction.Commit();
 		}
 	}
 }
