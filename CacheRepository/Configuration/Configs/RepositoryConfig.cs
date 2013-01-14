@@ -11,7 +11,7 @@ using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration.Configs
 {
-	public abstract class RepositoryConfig
+	public abstract class RepositoryConfig<TRepository> : IRepositoryConfig where TRepository : Repository
 	{
 		public IEnumerable<IIndex> Indexes { get; set; }
 		public INextIdStrategy NextIdStrategy { get; set; }
@@ -22,6 +22,6 @@ namespace CacheRepository.Configuration.Configs
 		public IUpdateStrategy UpdateStrategy { get; set; }
 		public IEntityRetrieverStrategy EntityRetrieverStrategy { get; set; }
 
-		public abstract Repository BuildRepository();
+		public abstract TRepository BuildRepository();
 	}
 }

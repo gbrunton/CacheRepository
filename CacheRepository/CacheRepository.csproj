@@ -52,11 +52,18 @@
   <ItemGroup>
     <Compile Include="BulkInsertStrategies\IBulkInsertStrategy.cs" />
     <Compile Include="BulkInsertStrategies\SqlServerBulkInsert.cs" />
+    <Compile Include="Configuration\Builders\FileRepositoryConfigBuilder.cs" />
+    <Compile Include="Configuration\Configs\FileRepositoryConfig.cs" />
+    <Compile Include="Configuration\Configs\IRepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\RepositoryConfig.cs" />
     <Compile Include="Configuration\Builders\SqlRepositoryConfigBuilder.cs" />
     <Compile Include="Configuration\Configs\SqlRepositoryConfig.cs" />
+    <Compile Include="ConnectionResolvers\FileConnectionResolver.cs" />
+    <Compile Include="EntityRetrieverStrategies\FileEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\SqlEntityRetrieverStrategy.cs" />
+    <Compile Include="FileEntityFactoryStrategies\ConstructorContainsLine.cs" />
+    <Compile Include="FileEntityFactoryStrategies\IFileEntityFactoryStrategy.cs" />
     <Compile Include="InsertStrategies\IInsertStrategy.cs" />
     <Compile Include="InsertStrategies\SqlInsert.cs" />
     <Compile Include="NextIdStrategies\IdDoesNotExist.cs" />
@@ -69,6 +76,7 @@
     <Compile Include="Indexes\NonUniqueIndex.cs" />
     <Compile Include="Indexes\UniqueIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
     <Compile Include="Configuration\Builders\RepositoryConfigBuilder.cs" />
     <Compile Include="Repositories\SqlRepository.cs" />

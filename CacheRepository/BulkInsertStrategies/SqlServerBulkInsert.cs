@@ -4,18 +4,18 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using CacheRepository.Configuration.Builders;
+using CacheRepository.Configuration.Configs;
 
 namespace CacheRepository.BulkInsertStrategies
 {
 	public class SqlServerBulkInsert : IBulkInsertStrategy
 	{
-		private readonly SqlRepositoryConfigBuilder sqlRepositoryConfigBuilder;
+		private readonly SqlRepositoryConfig repositoryConfig;
 
-		public SqlServerBulkInsert(SqlRepositoryConfigBuilder sqlRepositoryConfigBuilder)
+		public SqlServerBulkInsert(SqlRepositoryConfig repositoryConfig)
 		{
-			if (sqlRepositoryConfigBuilder == null) throw new ArgumentNullException("sqlRepositoryConfigBuilder");
-			this.sqlRepositoryConfigBuilder = sqlRepositoryConfigBuilder;
+			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
+			this.repositoryConfig = repositoryConfig;
 		}
 
 		public void Insert(Type type, IEnumerable<dynamic> entities)
@@ -23,8 +23,8 @@ namespace CacheRepository.BulkInsertStrategies
 			BulkInsert
 				(
 					type,
-					(SqlConnection)this.sqlRepositoryConfigBuilder.SqlConnectionResolver.GetConnection(),
-					(SqlTransaction)this.sqlRepositoryConfigBuilder.SqlConnectionResolver.GetTransaction(), 
+					(SqlConnection)this.repositoryConfig.SqlConnectionResolver.GetConnection(),
+					(SqlTransaction)this.repositoryConfig.SqlConnectionResolver.GetTransaction(), 
 					type.Name,
 			        entities
 				);

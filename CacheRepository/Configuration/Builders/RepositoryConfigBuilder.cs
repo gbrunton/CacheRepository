@@ -11,17 +11,13 @@ using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration.Builders
 {
-	public abstract class RepositoryConfigBuilder<TRepositoryBuilder, TRepositoryConfig> where TRepositoryConfig : RepositoryConfig
+	public abstract class RepositoryConfigBuilder<TRepositoryBuilder, TRepositoryConfig> 
+		where TRepositoryConfig : IRepositoryConfig
 	{
 		protected readonly List<Tuple<Type, string>> CustomEntitySql;
 		private IEnumerable<IIndex> indexes;
 		private INextIdStrategy nextIdStrategy;
 		private ISetIdStrategy setIdStrategy;
-
-		protected IBulkInsertStrategy BulkInsertStratgy;
-		protected IInsertStrategy InsertStrategy;
-		protected IUpdateStrategy UpdateStrategy;
-		protected IEntityRetrieverStrategy EntityRetrieverStrategy;
 
 		protected RepositoryConfigBuilder()
 		{
@@ -31,17 +27,22 @@ namespace CacheRepository.Configuration.Builders
 			this.setIdStrategy = new EntityHasNoIdSetter();
 		}
 
-		protected void BuildUp(RepositoryConfig repositoryConfig)
+		protected abstract IBulkInsertStrategy GetBulkInsertStrategy(TRepositoryConfig repositoryConfig);
+		protected abstract IInsertStrategy GetInsertStrategy(TRepositoryConfig repositoryConfig);
+		protected abstract IUpdateStrategy GetUpdateStrategy(TRepositoryConfig repositoryConfig);
+		protected abstract IEntityRetrieverStrategy GetEntityRetrieverStrategy(TRepositoryConfig repositoryConfig);
+
+		protected void BuildUp(TRepositoryConfig repositoryConfig)
 		{
 			repositoryConfig.Indexes = this.indexes;
 			repositoryConfig.NextIdStrategy = this.nextIdStrategy;
 			repositoryConfig.CustomEntitySql = this.CustomEntitySql;
 			repositoryConfig.SetIdStrategy = this.setIdStrategy;
 
-			repositoryConfig.BulkInsertStrategy = this.BulkInsertStratgy;
-			repositoryConfig.InsertStrategy = this.InsertStrategy;
-			repositoryConfig.UpdateStrategy = this.UpdateStrategy;
-			repositoryConfig.EntityRetrieverStrategy = this.EntityRetrieverStrategy;
+			repositoryConfig.BulkInsertStrategy = this.GetBulkInsertStrategy(repositoryConfig);
+			repositoryConfig.InsertStrategy = this.GetInsertStrategy(repositoryConfig);
+			repositoryConfig.UpdateStrategy = this.GetUpdateStrategy(repositoryConfig);
+			repositoryConfig.EntityRetrieverStrategy = this.GetEntityRetrieverStrategy(repositoryConfig);
 		}
 
 		public abstract TRepositoryConfig Build();

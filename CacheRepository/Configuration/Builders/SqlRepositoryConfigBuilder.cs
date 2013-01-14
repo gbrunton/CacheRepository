@@ -10,22 +10,39 @@ namespace CacheRepository.Configuration.Builders
 {
 	public class SqlRepositoryConfigBuilder : RepositoryConfigBuilder<SqlRepositoryConfigBuilder, SqlRepositoryConfig>
 	{
+		private readonly SqlConnectionResolver sqlConnectionResolver;
+
 		public SqlRepositoryConfigBuilder(SqlConnectionResolver sqlConnectionResolver)
 		{
-			SqlConnectionResolver = sqlConnectionResolver;
-			this.BulkInsertStratgy = new SqlServerBulkInsert(this);
-			this.InsertStrategy = new SqlInsert(this);
-			this.UpdateStrategy = new SqlUpdate(this);
-			this.EntityRetrieverStrategy = new SqlEntityRetrieverStrategy(this);
+			if (sqlConnectionResolver == null) throw new ArgumentNullException("sqlConnectionResolver");
+			this.sqlConnectionResolver = sqlConnectionResolver;
 		}
 
-		public SqlConnectionResolver SqlConnectionResolver { get; private set; }
+		protected override IBulkInsertStrategy GetBulkInsertStrategy(SqlRepositoryConfig repositoryConfig)
+		{
+			return new SqlServerBulkInsert(repositoryConfig);
+		}
+
+		protected override IInsertStrategy GetInsertStrategy(SqlRepositoryConfig repositoryConfig)
+		{
+			return new SqlInsert(repositoryConfig);
+		}
+
+		protected override IUpdateStrategy GetUpdateStrategy(SqlRepositoryConfig repositoryConfig)
+		{
+			return new SqlUpdate(repositoryConfig);
+		}
+
+		protected override IEntityRetrieverStrategy GetEntityRetrieverStrategy(SqlRepositoryConfig repositoryConfig)
+		{
+			return new SqlEntityRetrieverStrategy(repositoryConfig);
+		}
 
 		public override SqlRepositoryConfig Build()
 		{
 			var sqlRepositoryConfig = new SqlRepositoryConfig
 				{
-					SqlConnectionResolver = this.SqlConnectionResolver
+					SqlConnectionResolver = this.sqlConnectionResolver
 				};
 			base.BuildUp(sqlRepositoryConfig);
 			return sqlRepositoryConfig;
