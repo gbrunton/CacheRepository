@@ -1,112 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using CacheRepository.Behaviours;
 using CacheRepository.Configuration.Configs;
-using Dapper;
+using CacheRepository.Indexes;
+using FubuCore.Util;
 
 namespace CacheRepository.Repositories
 {
-	public class SqlRepository : Repository
+	public class SqlRepository
+		: IDisposable, ICanInsert, ICanBuilkInsert, ICanSqlQuery, ICanExecuteSql, ICanUpdate, ICanCommit, ICanGet
 	{
-		private readonly SqlRepositoryConfig repositoryConfig;
+		private readonly Repository repository;
 
-		public SqlRepository(SqlRepositoryConfig repositoryConfig) : base(repositoryConfig)
+		public SqlRepository(SqlRepositoryConfig repositoryConfig)
 		{
-			this.repositoryConfig = repositoryConfig;
-		}
-
-		public void BuilkInsertNonGeneric(object entity)
-		{
-			var typeOfEntity = entity.GetType();
-			var methodInfo = typeof(Repository).GetMethods().First(x => x.Name == "BulkInsert");
-			var generic = methodInfo.MakeGenericMethod(typeOfEntity);
-			var parameter = Array.CreateInstance(typeOfEntity, 1);
-			parameter.SetValue(entity, 0);
-			generic.Invoke(this, new object[] { parameter });
-		}
-
-		public void BulkInsert<TEntity>(params TEntity[] entities) where TEntity : class
-		{
-			this.BulkInsert((IEnumerable<TEntity>)entities);
-		}
-
-		public void BulkInsert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-		{
-			var type = typeof(TEntity);
-			this.insert(entities, entity => this.EntitiesCachedForBulkInsert[type].Add(entity));
-		}
-
-		public void BulkInsertFlush(IEnumerable<Type> flushOrder = null)
-		{
-			if (flushOrder != null)
-			{
-				flushOrder.Each(type =>
+			var config = new RepositoryConfig
 				{
-					this.repositoryConfig.BulkInsertStrategy.Insert(type, this.EntitiesCachedForBulkInsert[type]);
-					this.EntitiesCachedForBulkInsert.Remove(type);
-				});
-			}
+					DisposeStrategy = repositoryConfig.DisposeStrategy,
+					EntityRetrieverStrategy = repositoryConfig.EntityRetrieverStrategy,
+					Indexes = repositoryConfig.Indexes,
+					BulkInsertStrategy = repositoryConfig.BulkInsertStrategy,
+					CommitStrategy = repositoryConfig.CommitStrategy,
+					CustomEntitySql = repositoryConfig.CustomEntitySql,
+					ExecuteSqlStrategy = repositoryConfig.ExecuteSqlStrategy,
+					InsertStrategy = repositoryConfig.InsertStrategy,
+					NextIdStrategy = repositoryConfig.NextIdStrategy,
+					SetIdStrategy = repositoryConfig.SetIdStrategy,
+					QueryStrategy = repositoryConfig.QueryStrategy,
+					UpdateStrategy = repositoryConfig.UpdateStrategy
+				};
+			this.repository = new Repository(config);			
+		}
 
-			this.EntitiesCachedForBulkInsert
-				.Each((type, entityList) =>
-					  this.repositoryConfig.BulkInsertStrategy.Insert(type, this.EntitiesCachedForBulkInsert[type]));
-			this.EntitiesCachedForBulkInsert.ClearAll();
+		public void Dispose()
+		{
+			this.repository.Dispose();
 		}
 
 		public void Insert<TEntity>(params TEntity[] entities) where TEntity : class
 		{
-			this.Insert((IEnumerable<TEntity>)entities);
+			this.repository.Insert(entities);
 		}
 
 		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
-			insert(entities, entity =>
-							 this.repositoryConfig.InsertStrategy.Insert(entity));
+			this.repository.Insert(entities);
 		}
 
-		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class
+		public void BuilkInsertNonGeneric(object entity)
 		{
-			var type = typeof(TEntity);
-			var existingEntities = this.GetAllWithGeneric<TEntity>();
-			var typeIndexes = this.IndexesCached.Where(x => type == x.GetEntityType());
-			entities.Each(entity =>
-			{
-				var id = this.EntityIds[type];
-				this.repositoryConfig.SetIdStrategy.SetId(id, entity);
-				this.EntityIds[type] = this.repositoryConfig.NextIdStrategy.GetNextId(id);
-				existingEntities.Add(entity);
-				insertFunction(entity);
-				typeIndexes.Each(index => index.Add(entity));
-			});
+			this.repository.BuilkInsertNonGeneric(entity);
 		}
 
-		public void Update<TEntity>(TEntity entity) where TEntity : class
+		public void BulkInsert<TEntity>(params TEntity[] entities) where TEntity : class
 		{
-			this.repositoryConfig.UpdateStrategy.Update(entity);
+			this.repository.BulkInsert(entities);
+		}
+
+		public void BulkInsert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+		{
+			this.repository.BulkInsert(entities);
+		}
+
+		public void BulkInsertFlush(IEnumerable<Type> flushOrder = null)
+		{
+			this.repository.BulkInsertFlush(flushOrder);
+		}
+
+		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null) where TEntity : class
+		{
+			return this.repository.Query<TEntity>(query, parameters);
 		}
 
 		public void ExecuteSql(string sql, object parameters = null)
 		{
-			this.repositoryConfig.ConnectionResolver.GetConnection()
-				.Execute(
-				sql,
-				parameters,
-				this.repositoryConfig.ConnectionResolver.GetTransaction(),
-				0);
+			this.repository.ExecuteSql(sql, parameters);
 		}
 
-		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null)
+		public void Update<TEntity>(TEntity entity) where TEntity : class
 		{
-			return this.repositoryConfig
-				.ConnectionResolver
-				.GetConnection()
-				.Query<TEntity>
-					(query, parameters, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
+			this.repository.Update(entity);
 		}
 
 		public void Commit()
 		{
-			this.repositoryConfig.ConnectionResolver.Commit();
+			this.repository.Commit();
+		}
+
+		public IEnumerable<TEntity> GetAll<TEntity>() where TEntity : class
+		{
+			return this.repository.GetAll<TEntity>();
+		}
+
+		public TIndex GetIndex<TIndex>() where TIndex : IIndex
+		{
+			return this.repository.GetIndex<TIndex>();
+		}
+
+		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
+		{
+			return this.repository.GetHashOfIdsByEntityType();
 		}
 	}
 }

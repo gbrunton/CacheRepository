@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using CacheRepository.Configuration.Configs;
 using FubuCore.Util;
 
 namespace CacheRepository.ConnectionResolvers
@@ -9,13 +8,13 @@ namespace CacheRepository.ConnectionResolvers
 	{
 		private readonly Cache<string, StreamReader> streamReaderCache;
 
-		internal FileConnectionResolver(string rootPathFolder, FileRepositoryConfig fileRepositoryConfig)
+		internal FileConnectionResolver(string rootPathFolder, string fileExtension)
 		{
 			if (rootPathFolder == null) throw new ArgumentNullException("rootPathFolder");
 			this.streamReaderCache = new Cache<string, StreamReader>
 				{
 					OnMissing = name =>
-						File.OpenText(Path.Combine(rootPathFolder, name + fileRepositoryConfig.FileExtension))
+						File.OpenText(Path.Combine(rootPathFolder, name + fileExtension))
 				};
 		}
 

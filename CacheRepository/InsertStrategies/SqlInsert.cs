@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using CacheRepository.Configuration.Configs;
+using CacheRepository.ConnectionResolvers;
 using DapperExtensions;
 using DapperExtensions.Mapper;
 
@@ -8,21 +8,21 @@ namespace CacheRepository.InsertStrategies
 {
 	public class SqlInsert : IInsertStrategy
 	{
-		private readonly SqlRepositoryConfig repositoryConfig;
+		private readonly SqlConnectionResolver connectionResolver;
 
-		public SqlInsert(SqlRepositoryConfig repositoryConfig)
+		public SqlInsert(SqlConnectionResolver connectionResolver)
 		{
-			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
-			this.repositoryConfig = repositoryConfig;
+			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
+			this.connectionResolver = connectionResolver;
 		}
 
 		public void Insert<TEntity>(TEntity entity) where TEntity : class
 		{
 			var defaultMapper = DapperExtensions.DapperExtensions.DefaultMapper;
 			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
-			this.repositoryConfig.ConnectionResolver
+			this.connectionResolver
 				.GetConnection()
-				.Insert(entity, this.repositoryConfig.ConnectionResolver.GetTransaction(), 0);
+				.Insert(entity, this.connectionResolver.GetTransaction(), 0);
 			DapperExtensions.DapperExtensions.DefaultMapper = defaultMapper;
 		}
 	}

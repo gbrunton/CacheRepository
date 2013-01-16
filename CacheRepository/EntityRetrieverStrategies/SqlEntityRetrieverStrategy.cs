@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CacheRepository.Configuration.Configs;
+using CacheRepository.ConnectionResolvers;
 using Dapper;
 using FubuCore;
 
@@ -8,12 +8,12 @@ namespace CacheRepository.EntityRetrieverStrategies
 {
 	public class SqlEntityRetrieverStrategy : IEntityRetrieverStrategy
 	{
-		private readonly SqlRepositoryConfig repositoryConfig;
+		private readonly SqlConnectionResolver connectionResolver;
 
-		public SqlEntityRetrieverStrategy(SqlRepositoryConfig repositoryConfig)
+		public SqlEntityRetrieverStrategy(SqlConnectionResolver connectionResolver)
 		{
-			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
-			this.repositoryConfig = repositoryConfig;
+			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
+			this.connectionResolver = connectionResolver;
 		}
 
 		public IEnumerable<dynamic> GetAll<TEntity>(string queryString) where TEntity : class
@@ -21,10 +21,9 @@ namespace CacheRepository.EntityRetrieverStrategies
 			queryString = string.IsNullOrEmpty(queryString)
 							  ? "Select * From [{0}]".ToFormat(typeof(TEntity).Name)
 				              : queryString;
-			return this.repositoryConfig
-				.ConnectionResolver
+			return this.connectionResolver
 				.GetConnection()
-				.Query<TEntity>(queryString, null, this.repositoryConfig.ConnectionResolver.GetTransaction(), true, 0);
+				.Query<TEntity>(queryString, null, this.connectionResolver.GetTransaction(), true, 0);
 		}
 	}
 }

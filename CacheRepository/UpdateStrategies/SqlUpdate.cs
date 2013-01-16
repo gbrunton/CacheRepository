@@ -1,26 +1,26 @@
 ﻿using System;
-using CacheRepository.Configuration.Configs;
+using CacheRepository.ConnectionResolvers;
 using DapperExtensions;
 
 namespace CacheRepository.UpdateStrategies
 {
 	public class SqlUpdate : IUpdateStrategy
 	{
-		private readonly SqlRepositoryConfig repositoryConfig;
+		private readonly SqlConnectionResolver connectionResolver;
 
-		public SqlUpdate(SqlRepositoryConfig repositoryConfig)
+		public SqlUpdate(SqlConnectionResolver connectionResolver)
 		{
-			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
-			this.repositoryConfig = repositoryConfig;
+			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
+			this.connectionResolver = connectionResolver;
 		}
 
 		public void Update<TEntity>(TEntity entity) where TEntity : class
 		{
 			// what happens if an indexed property gets updated???
 			// See Issue #2
-			this.repositoryConfig.ConnectionResolver
+			this.connectionResolver
 				.GetConnection()
-				.Update(entity, this.repositoryConfig.ConnectionResolver.GetTransaction());
+				.Update(entity, this.connectionResolver.GetTransaction());
 		}
 	}
 }

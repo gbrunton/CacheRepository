@@ -50,21 +50,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviours\ICanBuilkInsert.cs" />
+    <Compile Include="Behaviours\ICanCommit.cs" />
+    <Compile Include="Behaviours\ICanExecuteSql.cs" />
+    <Compile Include="Behaviours\ICanGet.cs" />
+    <Compile Include="Behaviours\ICanInsert.cs" />
+    <Compile Include="Behaviours\ICanSqlQuery.cs" />
+    <Compile Include="Behaviours\ICanUpdate.cs" />
+    <Compile Include="BulkInsertStrategies\DoNothingBulkInsert.cs" />
     <Compile Include="BulkInsertStrategies\IBulkInsertStrategy.cs" />
     <Compile Include="BulkInsertStrategies\SqlServerBulkInsert.cs" />
+    <Compile Include="CommitStrategies\CommitSqlConnection.cs" />
+    <Compile Include="CommitStrategies\DoNothingCommit.cs" />
+    <Compile Include="CommitStrategies\ICommitStrategy.cs" />
     <Compile Include="Configuration\Builders\FileRepositoryConfigBuilder.cs" />
+    <Compile Include="Configuration\Builders\SqlRepositoryConfigBuilder.cs" />
     <Compile Include="Configuration\Configs\FileRepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\IRepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\RepositoryConfig.cs" />
-    <Compile Include="Configuration\Builders\SqlRepositoryConfigBuilder.cs" />
     <Compile Include="Configuration\Configs\SqlRepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\FileConnectionResolver.cs" />
     <Compile Include="ConnectionResolvers\IConnectionResolver.cs" />
+    <Compile Include="DisposeStrategies\DisposeConnectionResolver.cs" />
+    <Compile Include="DisposeStrategies\IDisposeStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\FileEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\SqlEntityRetrieverStrategy.cs" />
+    <Compile Include="ExecuteSqlStrategies\DoNothingExecuteSql.cs" />
+    <Compile Include="ExecuteSqlStrategies\ExecuteSqlWithDapper.cs" />
+    <Compile Include="ExecuteSqlStrategies\IExecuteSqlStrategy.cs" />
     <Compile Include="FileEntityFactoryStrategies\ConstructorContainsLine.cs" />
     <Compile Include="FileEntityFactoryStrategies\IFileEntityFactoryStrategy.cs" />
+    <Compile Include="InsertStrategies\DoNothingInsert.cs" />
     <Compile Include="InsertStrategies\IInsertStrategy.cs" />
     <Compile Include="InsertStrategies\SqlInsert.cs" />
     <Compile Include="NextIdStrategies\IdDoesNotExist.cs" />
@@ -77,13 +94,16 @@
     <Compile Include="Indexes\NonUniqueIndex.cs" />
     <Compile Include="Indexes\UniqueIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryStrategies\DoNothingQuery.cs" />
+    <Compile Include="QueryStrategies\IQueryStrategy.cs" />
+    <Compile Include="QueryStrategies\QueryWithDapper.cs" />
     <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
-    <Compile Include="Configuration\Builders\RepositoryConfigBuilder.cs" />
     <Compile Include="Repositories\SqlRepository.cs" />
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasNoIdSetter.cs" />
     <Compile Include="SetIdStrategy\ISetIdStrategy.cs" />
+    <Compile Include="UpdateStrategies\DoNothingUpdate.cs" />
     <Compile Include="UpdateStrategies\IUpdateStrategy.cs" />
     <Compile Include="UpdateStrategies\SqlUpdate.cs" />
   </ItemGroup>

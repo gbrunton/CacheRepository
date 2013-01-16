@@ -1,73 +1,41 @@
 ﻿using System;
-using CacheRepository.BulkInsertStrategies;
+using System.Collections.Generic;
 using CacheRepository.Configuration.Configs;
 using CacheRepository.ConnectionResolvers;
-using CacheRepository.EntityRetrieverStrategies;
+using CacheRepository.DisposeStrategies;
 using CacheRepository.FileEntityFactoryStrategies;
-using CacheRepository.InsertStrategies;
-using CacheRepository.NextIdStrategies;
-using CacheRepository.Repositories;
-using CacheRepository.SetIdStrategy;
-using CacheRepository.UpdateStrategies;
+using CacheRepository.Indexes;
 
 namespace CacheRepository.Configuration.Builders
 {
-	public class FileRepositoryConfigBuilder 
-		: RepositoryConfigBuilder<FileRepositoryConfigBuilder, FileRepositoryConfig, FileConnectionResolver, FileRepository>
+	public class FileRepositoryConfigBuilder
 	{
 		private readonly string rootPathFolder;
 		private string fileExtension;
+		private IEnumerable<IIndex> indexes;
 		private IFileEntityFactoryStrategy fileEntityFactoryStrategy;
+		private IDisposeStrategy disposeStrategy;
 
-		public FileRepositoryConfigBuilder(string rootPathFolder) 
+		public FileRepositoryConfigBuilder(string rootPathFolder)
 		{
 			if (rootPathFolder == null) throw new ArgumentNullException("rootPathFolder");
 			this.rootPathFolder = rootPathFolder;
 			this.fileExtension = ".txt";
+			this.indexes = new List<IIndex>();
 			this.fileEntityFactoryStrategy = new ConstructorContainsLine();
-			base.WithNextIdStrategy(new IdDoesNotExist());
-			base.WithSetIdStrategy(new EntityHasNoIdSetter());
 		}
 
-		protected override IBulkInsertStrategy GetBulkInsertStrategy(FileRepositoryConfig repositoryConfig)
+		public FileRepositoryConfig Build()
 		{
-			return null;
-		}
-
-		protected override IInsertStrategy GetInsertStrategy(FileRepositoryConfig repositoryConfig)
-		{
-			return null;
-		}
-
-		protected override IUpdateStrategy GetUpdateStrategy(FileRepositoryConfig repositoryConfig)
-		{
-			return null;
-		}
-
-		protected override IEntityRetrieverStrategy GetEntityRetrieverStrategy(FileRepositoryConfig repositoryConfig)
-		{
-			return new FileEntityRetrieverStrategy(repositoryConfig);
-		}
-
-		protected override FileConnectionResolver GetConnectionResolver(FileRepositoryConfig repositoryConfig)
-		{
-			return new FileConnectionResolver(this.rootPathFolder, repositoryConfig);
-		}
-
-		public override FileRepositoryConfig Build()
-		{
-			var repositoryConfig = new FileRepositoryConfig
+			var connectionResolver = new FileConnectionResolver(this.rootPathFolder, this.fileExtension);
+			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
+			return new FileRepositoryConfig
 				{
-					FileExtension = this.fileExtension,
-					FileEntityFactoryStrategy = this.fileEntityFactoryStrategy
+					ConnectionResolver = connectionResolver,
+					Indexes = this.indexes,
+					EntityFactoryStrategy = this.fileEntityFactoryStrategy,
+					DisposeStrategy = this.disposeStrategy
 				};
-			base.BuildUp(repositoryConfig);
-			return repositoryConfig;
-		}
-
-		protected override FileRepositoryConfigBuilder GetThis()
-		{
-			return this;
 		}
 
 		public FileRepositoryConfigBuilder WithFileExtension(string newValue)
@@ -76,7 +44,19 @@ namespace CacheRepository.Configuration.Builders
 			return this;
 		}
 
-		public FileRepositoryConfigBuilder WithFileEntityFactory(IFileEntityFactoryStrategy newValue)
+		public FileRepositoryConfigBuilder WithIndexes(IEnumerable<IIndex> newValue)
+		{
+			this.indexes = newValue ?? new List<IIndex>();
+			return this;
+		}
+
+		public FileRepositoryConfigBuilder WithIndexes(params IIndex[] newValue)
+		{
+			this.indexes = newValue;
+			return this;
+		}
+
+		public FileRepositoryConfigBuilder WithFileEntityFactoryStrategy(IFileEntityFactoryStrategy newValue)
 		{
 			this.fileEntityFactoryStrategy = newValue;
 			return this;

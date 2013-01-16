@@ -1,17 +1,20 @@
-﻿using CacheRepository.ConnectionResolvers;
+﻿using System.Collections.Generic;
+using CacheRepository.ConnectionResolvers;
+using CacheRepository.DisposeStrategies;
 using CacheRepository.FileEntityFactoryStrategies;
+using CacheRepository.Indexes;
 using CacheRepository.Repositories;
 
 namespace CacheRepository.Configuration.Configs
 {
-	public class FileRepositoryConfig : RepositoryConfig<FileRepository, FileConnectionResolver>
+	public class FileRepositoryConfig
 	{
-		internal FileRepositoryConfig() {}
+		public FileConnectionResolver ConnectionResolver { get; set; }
+		public IEnumerable<IIndex> Indexes { get; set; }
+		public IFileEntityFactoryStrategy EntityFactoryStrategy { get; set; }
+		public IDisposeStrategy DisposeStrategy { get; set; }
 
-		public string FileExtension { get; set; }
-		public IFileEntityFactoryStrategy FileEntityFactoryStrategy { get; set; }
-
-		public override FileRepository BuildRepository()
+		public FileRepository BuildRepository()
 		{
 			return new FileRepository(this);
 		}
