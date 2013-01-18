@@ -26,7 +26,7 @@ namespace CacheRepository.Repositories
 			this.indexesCached = new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
-			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(this.getAll(key).Max(x => x.Id)) };
+			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(key, this.getAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 			this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
@@ -88,8 +88,8 @@ namespace CacheRepository.Repositories
 			entities.Each(entity =>
 			{
 				var id = this.entityIds[type];
-				this.repositoryConfig.SetIdStrategy.SetId(id, entity);
-				this.entityIds[type] = this.repositoryConfig.NextIdStrategy.GetNextId(id);
+				this.repositoryConfig.SetIdStrategy.SetId(type, id, entity);
+				this.entityIds[type] = this.repositoryConfig.NextIdStrategy.GetNextId(type, id);
 				existingEntities.Add(entity);
 				insertFunction(entity);
 				typeIndexes.Each(index => index.Add(entity));

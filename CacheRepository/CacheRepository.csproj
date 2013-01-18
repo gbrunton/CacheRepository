@@ -83,7 +83,8 @@
     <Compile Include="FileEntityFactoryStrategies\IFileEntityFactoryStrategy.cs" />
     <Compile Include="InsertStrategies\DoNothingInsert.cs" />
     <Compile Include="InsertStrategies\IInsertStrategy.cs" />
-    <Compile Include="InsertStrategies\SqlInsert.cs" />
+    <Compile Include="InsertStrategies\SqlInsertWithDapper.cs" />
+    <Compile Include="NextIdStrategies\SmartNextIdRetreiver.cs" />
     <Compile Include="NextIdStrategies\IdDoesNotExist.cs" />
     <Compile Include="NextIdStrategies\IdIsGuid.cs" />
     <Compile Include="NextIdStrategies\IdIsInt.cs" />
@@ -100,12 +101,13 @@
     <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
     <Compile Include="Repositories\SqlRepository.cs" />
+    <Compile Include="SetIdStrategy\SmartEntityIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasNoIdSetter.cs" />
     <Compile Include="SetIdStrategy\ISetIdStrategy.cs" />
     <Compile Include="UpdateStrategies\DoNothingUpdate.cs" />
     <Compile Include="UpdateStrategies\IUpdateStrategy.cs" />
-    <Compile Include="UpdateStrategies\SqlUpdate.cs" />
+    <Compile Include="UpdateStrategies\SqlUpdateWithDapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

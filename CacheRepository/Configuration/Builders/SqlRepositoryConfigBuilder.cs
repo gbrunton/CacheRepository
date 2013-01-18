@@ -12,7 +12,6 @@ using CacheRepository.Indexes;
 using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.QueryStrategies;
-using CacheRepository.Repositories;
 using CacheRepository.SetIdStrategy;
 using CacheRepository.UpdateStrategies;
 
@@ -40,8 +39,8 @@ namespace CacheRepository.Configuration.Builders
 			this.connection = connection;
 			this.indexes = new List<IIndex>();
 			this.customEntitySql = new List<Tuple<Type, string>>();
-			this.nextIdStrategy = new IdDoesNotExist();
-			this.setIdStrategy = new EntityHasNoIdSetter();
+			this.nextIdStrategy = new SmartNextIdRetreiver();
+			this.setIdStrategy = new SmartEntityIdSetter();
 		}
 
 		public SqlRepositoryConfig Build()
@@ -51,8 +50,8 @@ namespace CacheRepository.Configuration.Builders
 			this.commitStrategy = this.commitStrategy ?? new CommitSqlConnection(connectionResolver);
 			this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver);
 			this.executeSqlStrategy = this.executeSqlStrategy ?? new ExecuteSqlWithDapper(connectionResolver);
-			this.insertStrategy = this.insertStrategy ?? new SqlInsert(connectionResolver);
-			this.updateStrategy = this.updateStrategy ?? new SqlUpdate(connectionResolver);
+			this.insertStrategy = this.insertStrategy ?? new SqlInsertWithDapper(connectionResolver);
+			this.updateStrategy = this.updateStrategy ?? new SqlUpdateWithDapper(connectionResolver);
 			this.queryStrategy = this.queryStrategy ?? new QueryWithDapper(connectionResolver);
 			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
 			return new SqlRepositoryConfig

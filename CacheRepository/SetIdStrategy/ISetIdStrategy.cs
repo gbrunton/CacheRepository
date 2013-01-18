@@ -1,7 +1,9 @@
-﻿namespace CacheRepository.SetIdStrategy
+﻿using System;
+
+namespace CacheRepository.SetIdStrategy
 {
 	public interface ISetIdStrategy
 	{
-		void SetId(dynamic entityId, dynamic entity);
+		void SetId(Type type, dynamic entityId, dynamic entity);
 	}
 }

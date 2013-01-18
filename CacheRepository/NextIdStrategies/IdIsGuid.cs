@@ -4,7 +4,7 @@ namespace CacheRepository.NextIdStrategies
 {
 	public class IdIsGuid : INextIdStrategy
 	{
-		public dynamic GetNextId(dynamic currentMaxId)
+		public dynamic GetNextId(Type type, dynamic currentMaxId)
 		{
 			return Guid.NewGuid();
 		}

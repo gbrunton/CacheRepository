@@ -4,11 +4,11 @@ using DapperExtensions;
 
 namespace CacheRepository.UpdateStrategies
 {
-	public class SqlUpdate : IUpdateStrategy
+	public class SqlUpdateWithDapper : IUpdateStrategy
 	{
 		private readonly SqlConnectionResolver connectionResolver;
 
-		public SqlUpdate(SqlConnectionResolver connectionResolver)
+		public SqlUpdateWithDapper(SqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;

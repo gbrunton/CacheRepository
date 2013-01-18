@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://raw.github.com/gbrunton/CacheRepository/master/license.txt</licenseUrl>
+    <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>[1.1] Made entity id configuration not necessary for most cases.  [1.0] This is the initial release of the library.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>.NET Repository Cache ORM</tags>
+  </metadata>
+</package>

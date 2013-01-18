@@ -1,8 +1,10 @@
-﻿namespace CacheRepository.NextIdStrategies
+﻿using System;
+
+namespace CacheRepository.NextIdStrategies
 {
 	public class IdIsInt : INextIdStrategy
 	{
-		public dynamic GetNextId(dynamic currentMaxId)
+		public dynamic GetNextId(Type type, dynamic currentMaxId)
 		{
 			return currentMaxId + 1 ?? 1;
 		}

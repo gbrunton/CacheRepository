@@ -6,11 +6,11 @@ using DapperExtensions.Mapper;
 
 namespace CacheRepository.InsertStrategies
 {
-	public class SqlInsert : IInsertStrategy
+	public class SqlInsertWithDapper : IInsertStrategy
 	{
 		private readonly SqlConnectionResolver connectionResolver;
 
-		public SqlInsert(SqlConnectionResolver connectionResolver)
+		public SqlInsertWithDapper(SqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;
