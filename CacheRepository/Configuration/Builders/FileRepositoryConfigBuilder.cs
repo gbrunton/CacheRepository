@@ -34,7 +34,6 @@ namespace CacheRepository.Configuration.Builders
 			this.delimitor = string.Empty;
 			this.fieldQualifier = string.Empty;
 			this.indexes = new List<IIndex>();
-			this.fileEntityFactoryStrategy = new ConstructorContainsLine();
 			this.nextIdStrategy = new SmartNextIdRetreiver();
 			this.setIdStrategy = new SmartEntityIdSetter();
 			this.outputConventions = new List<IOutputConvention>();
@@ -42,9 +41,14 @@ namespace CacheRepository.Configuration.Builders
 
 		public FileRepositoryConfig Build()
 		{
-			var connectionResolver = new FileConnectionResolver(this.rootPathFolder, this.fileExtension);
+			var filePathResolver = new FilePathResolver(this.rootPathFolder, this.fileExtension);
+			var connectionResolver = new FileConnectionResolver(filePathResolver);
 			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
 			this.insertStrategy = this.insertStrategy ?? new FileInsert(connectionResolver, this.outputConventions, this.delimitor, this.fieldQualifier);
+			this.fileEntityFactoryStrategy = this.fileEntityFactoryStrategy ?? 
+												(string.IsNullOrEmpty(this.delimitor)
+												 ? (IFileEntityFactoryStrategy) new ConstructorContainsLine()
+				                                 : new ConstructByEvaluatingDelimitedFile(filePathResolver, this.delimitor, this.fieldQualifier));
 			return new FileRepositoryConfig
 				{
 					ConnectionResolver = connectionResolver,

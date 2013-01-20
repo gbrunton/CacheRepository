@@ -70,6 +70,7 @@
     <Compile Include="Configuration\Configs\RepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\SqlRepositoryConfig.cs" />
     <Compile Include="ConnectionResolvers\FileConnectionResolver.cs" />
+    <Compile Include="ConnectionResolvers\FilePathResolver.cs" />
     <Compile Include="ConnectionResolvers\IConnectionResolver.cs" />
     <Compile Include="ConnectionResolvers\IFileConnectionResolver.cs" />
     <Compile Include="DisposeStrategies\DisposeConnectionResolver.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="ExecuteSqlStrategies\DoNothingExecuteSql.cs" />
     <Compile Include="ExecuteSqlStrategies\ExecuteSqlWithDapper.cs" />
     <Compile Include="ExecuteSqlStrategies\IExecuteSqlStrategy.cs" />
+    <Compile Include="FileEntityFactoryStrategies\ConstructByEvaluatingDelimitedFile.cs" />
     <Compile Include="FileEntityFactoryStrategies\ConstructorContainsLine.cs" />
     <Compile Include="FileEntityFactoryStrategies\IFileEntityFactoryStrategy.cs" />
     <Compile Include="InsertStrategies\DoNothingInsert.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasNoIdSetter.cs" />
     <Compile Include="SetIdStrategy\ISetIdStrategy.cs" />
+    <Compile Include="StaticUtils\StringExtensions.cs" />
     <Compile Include="StringFormatterAttributes\IStringFormatterAttribute.cs" />
     <Compile Include="UpdateStrategies\DoNothingUpdate.cs" />
     <Compile Include="UpdateStrategies\IUpdateStrategy.cs" />

@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Blog.cs" />
+    <Compile Include="IntegrationTests\Repositories\FileRepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\InsertStrategies\FileInsertTestFixture.cs" />
     <Compile Include="UnitTests\NextIdStrategies\SmartNextIdRetreiverTestFixture.cs" />
@@ -59,7 +61,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CacheRepository.csproj">
+    <ProjectReference Include="..\CacheRepository\CacheRepository.csproj">
       <Project>{0f05b866-1f76-4c0c-acbb-b88080ec97b5}</Project>
       <Name>CacheRepository</Name>
     </ProjectReference>

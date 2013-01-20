@@ -5,6 +5,7 @@ using CacheRepository.InsertStrategies;
 using CacheRepository.OutputConventions;
 using FubuCore;
 using NUnit.Framework;
+using Tests.Entities;
 
 namespace Tests.UnitTests.InsertStrategies
 {
@@ -41,7 +42,7 @@ namespace Tests.UnitTests.InsertStrategies
 				createSut().Insert(new Blog());
 
 				// Assert
-				Assert.AreEqual("0", this.connectionResolver.GetLine(), "Should be a 0 because that's the default value of an int");
+				Assert.AreEqual("0{0}".ToFormat(default(DateTime)), this.connectionResolver.GetLine(), "Should be a 0 because that's the default value of an int");
 			}
 
 			[Test]
@@ -49,6 +50,7 @@ namespace Tests.UnitTests.InsertStrategies
 			{
 				// Arrange
 				var createdDate = DateTime.Now;
+				var modifiedDate = createdDate.AddDays(1);
 
 				// Act
 				createSut().Insert(new Blog
@@ -56,11 +58,13 @@ namespace Tests.UnitTests.InsertStrategies
 					Id = 1,
 					Title = "Future Time Saver Log",
 					Author = "Gary Brunton",
-					CreatedDate = createdDate
+					CreatedDate = createdDate,
+					ModifiedDate = modifiedDate
 				});
 
 				// Assert
-				Assert.AreEqual("1Future Time Saver LogGary Brunton{0}".ToFormat(createdDate), this.connectionResolver.GetLine());
+				Assert.AreEqual("1Future Time Saver LogGary Brunton{0}{1}".ToFormat(createdDate, modifiedDate), 
+					this.connectionResolver.GetLine());
 			}
 
 			[Test]
@@ -78,7 +82,7 @@ namespace Tests.UnitTests.InsertStrategies
 				});
 
 				// Assert
-				Assert.AreEqual("1,Future Time Saver Log,Gary Brunton,", this.connectionResolver.GetLine());
+				Assert.AreEqual("1,Future Time Saver Log,Gary Brunton,{0},".ToFormat(default(DateTime)), this.connectionResolver.GetLine());
 			}
 
 			[Test]
@@ -97,7 +101,7 @@ namespace Tests.UnitTests.InsertStrategies
 				});
 
 				// Assert
-				Assert.AreEqual("\"1\",\"Future Time Saver Log\",\"Gary Brunton\",\"\"", this.connectionResolver.GetLine());
+				Assert.AreEqual("\"1\",\"Future Time Saver Log\",\"Gary Brunton\",\"{0}\",\"\"".ToFormat(default(DateTime)), this.connectionResolver.GetLine());
 			}
 
 			private class FakeConnectionResolver : IFileConnectionResolver
@@ -113,14 +117,6 @@ namespace Tests.UnitTests.InsertStrategies
 				{
 					return this.line;
 				}
-			}
-
-			private class Blog
-			{
-				public int Id { get; set; }
-				public string Title { get; set; }
-				public string Author { get; set; }
-				public DateTime? CreatedDate { get; set; }
 			}
 		} 
 	}
