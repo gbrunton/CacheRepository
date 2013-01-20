@@ -4,9 +4,10 @@ using FubuCore.Util;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class FileConnectionResolver : IConnectionResolver
+	public class FileConnectionResolver : IConnectionResolver, IFileConnectionResolver
 	{
 		private readonly Cache<string, StreamReader> streamReaderCache;
+		private readonly Cache<string, StreamWriter> streamWriterCache;
 
 		internal FileConnectionResolver(string rootPathFolder, string fileExtension)
 		{
@@ -16,11 +17,22 @@ namespace CacheRepository.ConnectionResolvers
 					OnMissing = name =>
 						File.OpenText(Path.Combine(rootPathFolder, name + fileExtension))
 				};
+
+			this.streamWriterCache = new Cache<string, StreamWriter>
+			{
+				OnMissing = name =>
+					File.CreateText(Path.Combine(rootPathFolder, name + fileExtension))
+			};
 		}
 
-		public StreamReader GetFile(string name)
+		public string GetLine(string entityName)
 		{
-			return this.streamReaderCache[name];
+			return this.streamReaderCache[entityName].ReadLine();
+		}
+
+		public void WriteLine<TEntity>(string line)
+		{
+			this.streamWriterCache[typeof (TEntity).Name].WriteLine(line);
 		}
 
 		public void Dispose()

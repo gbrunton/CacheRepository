@@ -111,6 +111,8 @@ using (var repository = config.BuildRepository())
 
 This would load all 5000000 entities into memory which may be or may not be what you want.
 
+We can customize the dynamic "GetAll" sql but adding CustomEntitySql for a given entity type. 
+
 ```c#
 var config = new SqlRepositoryConfigBuilder(connection)
 	.AddCustomEntitySql<Blog>("Select Top 100 * From Blog")
@@ -121,7 +123,7 @@ using (var repository = config.BuildRepository())
 }
 ```
 
-We can customize the dynamic "GetAll" sql but adding CustomEntitySql for a given entity type. Now our GetAll method only loads 100 entities into memory.
+Now our GetAll method only loads 100 entities into memory.
 
 ## Update
 

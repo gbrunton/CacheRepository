@@ -7,17 +7,14 @@ using CacheRepository.Configuration.Configs;
 using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.ExecuteSqlStrategies;
 using CacheRepository.Indexes;
-using CacheRepository.InsertStrategies;
-using CacheRepository.NextIdStrategies;
 using CacheRepository.QueryStrategies;
-using CacheRepository.SetIdStrategy;
 using CacheRepository.UpdateStrategies;
 using FubuCore.Util;
 
 namespace CacheRepository.Repositories
 {
 	public class FileRepository
-		: IDisposable, ICanGet
+		: IDisposable, ICanGet, ICanInsert
 	{
 		private readonly Repository repository;
 
@@ -32,9 +29,9 @@ namespace CacheRepository.Repositories
 					CommitStrategy = new DoNothingCommit(),
 					CustomEntitySql = new List<Tuple<Type, string>>(),
 					ExecuteSqlStrategy = new DoNothingExecuteSql(),
-					InsertStrategy = new DoNothingInsert(),
-					NextIdStrategy = new IdDoesNotExist(),
-					SetIdStrategy = new EntityHasNoIdSetter(),
+					InsertStrategy = repositoryConfig.InsertStrategy,
+					NextIdStrategy = repositoryConfig.NextIdStrategy,
+					SetIdStrategy = repositoryConfig.SetIdStrategy,
 					QueryStrategy = new DoNothingQuery(),
 					UpdateStrategy = new DoNothingUpdate()
 				};
@@ -59,6 +56,16 @@ namespace CacheRepository.Repositories
 		public Cache<Type, dynamic> GetHashOfIdsByEntityType()
 		{
 			return this.repository.GetHashOfIdsByEntityType();
+		}
+
+		public void Insert<TEntity>(params TEntity[] entities) where TEntity : class
+		{
+			this.repository.Insert(entities);
+		}
+
+		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+		{
+			this.repository.Insert(entities);
 		}
 	}
 }

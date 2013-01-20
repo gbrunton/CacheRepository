@@ -2,7 +2,7 @@
 using CacheRepository.NextIdStrategies;
 using NUnit.Framework;
 
-namespace Tests.UnitTests
+namespace Tests.UnitTests.NextIdStrategies
 {
 	public class SmartNextIdRetreiverTestFixture
 	{

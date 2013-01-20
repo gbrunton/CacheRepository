@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!-- 
+use the following command to create a new nupkg file:
+nuget pack CacheRepository.csproj
+-->
 <package >
   <metadata>
     <id>$id$</id>
