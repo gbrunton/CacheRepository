@@ -1,8 +1,12 @@
 # CacheRepository
 
-A repository that caches data in memory and allows you to use indexes to query data quickly. By default, [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) is used internally for relational database support. This means that many of the same configuration features and [conventions](https://github.com/tmsmith/Dapper-Extensions/blob/master/readme.md#naming-conventions) available in Dapper-Extensions applies to CacheRepository as well. 
+A repository that caches data in memory and allows you to use indexes to query data quickly. By default, [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) is used internally for relational database support. This means that many of the same configuration features and [conventions](https://github.com/tmsmith/Dapper-Extensions/blob/master/readme.md#naming-conventions) available in Dapper-Extensions applies to CacheRepository as well. CacheRepository also supports text files as data sources.
 
 I mostly use this library within [ETL](http://en.wikipedia.org/wiki/Extract,_transform,_load) programs that I write when it is necessary to be fast and when I will very likely be moving large amounts of data around.
+
+See the following for more details
+[CacheRepository Introduction (Why I Made It)](http://gbrunton.blogspot.com/2013/01/cacherepository-introduction-why-i-made.html)
+[Writing To And Reading From Text File](https://github.com/gbrunton/CacheRepository/blob/master/Tests/IntegrationTests/Repositories/FileRepositoryTests.cs)
 
 ## Features
 
@@ -209,8 +213,17 @@ public class Blog
 }
 ```
 
-## Coming Next
+## File Output Conventions
 
-Right now there are no insert or update methods on the FileRepository. I have some ideas that I might try out and if they work I'll add them to CacheRepository.
+Implementations of [IOutputConvension](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/OutputConventions/IOutputConvention.cs) can be created to apply formatting of property values based on conventions.
 
-I would also like to support the ability to load delimited files with little to no configuration.
+For example, the [DateTimeToMMddyyyy]() convention will automatically format all DateTime and DateTime? properties to the MMddyyyy format when saved to a text file.
+
+## File String Formatter Attributes
+
+You can create your own [IStringFormatterAttribute](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/StringFormatterAttributes/IStringFormatterAttribute.cs) implementations and apply them directly to properties for explicit formatting.
+
+## Still To Come
+
+Text file bulk insert implementation?
+Text file update implementation?

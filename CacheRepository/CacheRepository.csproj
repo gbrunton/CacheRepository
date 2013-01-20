@@ -98,8 +98,8 @@
     <Compile Include="Indexes\Index.cs" />
     <Compile Include="Indexes\NonUniqueIndex.cs" />
     <Compile Include="Indexes\UniqueIndex.cs" />
+    <Compile Include="OutputConventions\DateTimeToyyyyMMdd.cs" />
     <Compile Include="OutputConventions\IOutputConvention.cs" />
-    <Compile Include="OutputConventions\PropertyName_Length.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryStrategies\DoNothingQuery.cs" />
     <Compile Include="QueryStrategies\IQueryStrategy.cs" />

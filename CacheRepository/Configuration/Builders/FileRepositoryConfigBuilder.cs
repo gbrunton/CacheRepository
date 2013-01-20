@@ -48,7 +48,7 @@ namespace CacheRepository.Configuration.Builders
 			this.fileEntityFactoryStrategy = this.fileEntityFactoryStrategy ?? 
 												(string.IsNullOrEmpty(this.delimitor)
 												 ? (IFileEntityFactoryStrategy) new ConstructorContainsLine()
-				                                 : new ConstructByEvaluatingDelimitedFile(filePathResolver, this.delimitor, this.fieldQualifier));
+				                                 : new ConstructByEvaluatingDelimitedFile(this.delimitor, this.fieldQualifier));
 			return new FileRepositoryConfig
 				{
 					ConnectionResolver = connectionResolver,
