@@ -106,7 +106,7 @@ using (var repository = config.BuildRepository())
 
 This is basically the same API that [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) uses but I'm doing it on the repository and not direction on the connection.
 
-## Update
+## Update (On SqlRepository only)
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -118,7 +118,7 @@ using (var repository = config.BuildRepository())
 }
 ```
 
-## In Memory Linq (On SqlRepository only)
+## In Memory Linq
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -197,7 +197,7 @@ using (var repository = config.BuildRepository())
 
 These in memory Linq statements and in memory indexes work on the FileRepository in the exact same way as they work on the SqlRepository.
 
-I've included some basic support to build up and query text files with the same API. Right now you can use the [ConstructorContainsLine](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/FileEntityFactoryStrategies/ConstructorContainsLine.cs) type to build entities by defining an action in a constructor.
+I've included some basic support to build up and query text files with the same API. Right now you can use the [ConstructorContainsLine](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/FileEntityFactoryStrategies/ConstructorContainsLine.cs) type to build entities by defining an action from within a constructor.
 
 ```c#
 public class Blog
@@ -217,6 +217,8 @@ public class Blog
 }
 ```
 
+See the [ConstructByEvaluatingDelimitedFile](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/FileEntityFactoryStrategies/ConstructByEvaluatingDelimitedFile.cs) type for building up entities from delimited text files.
+
 ## File Output Conventions
 
 Implementations of [IOutputConvension](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/OutputConventions/IOutputConvention.cs) can be created to apply formatting of property values based on conventions.
@@ -227,8 +229,10 @@ For example, the [DateTimeToyyyyMMdd](https://github.com/gbrunton/CacheRepositor
 
 You can create your own [IStringFormatterAttribute](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/StringFormatterAttributes/IStringFormatterAttribute.cs) implementations and apply them directly to properties for explicit formatting.
 
+For example, the [LengthAttribute](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/StringFormatterAttributes/LengthAttribute.cs) attribute allows you to set a field's length and justification.
+
 ## Still To Come
 
-Text file bulk insert implementation?
+Text file bulk insert implementation? (Note, I need to look into this. I'm not auto flushing the file stream so my current implementation of Insert might actually be closer to the BulkInsert)
 
 Text file update implementation?
