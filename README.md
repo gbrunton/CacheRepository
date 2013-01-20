@@ -7,6 +7,7 @@ CacheRepository also supports text files as data sources.
 I mostly use CacheRepository library within [ETL](http://en.wikipedia.org/wiki/Extract,_transform,_load) programs that I write when it is necessary to be fast and when I will very likely be moving large amounts of data around.
 
 See the following for more details
+
 [CacheRepository Introduction (Why I Made It)](http://gbrunton.blogspot.com/2013/01/cacherepository-introduction-why-i-made.html)
 
 [Writing To And Reading From Text File](https://github.com/gbrunton/CacheRepository/blob/master/Tests/IntegrationTests/Repositories/FileRepositoryTests.cs)
@@ -229,4 +230,5 @@ You can create your own [IStringFormatterAttribute](https://github.com/gbrunton/
 ## Still To Come
 
 Text file bulk insert implementation?
+
 Text file update implementation?

@@ -113,6 +113,7 @@
     <Compile Include="SetIdStrategy\ISetIdStrategy.cs" />
     <Compile Include="StaticUtils\StringExtensions.cs" />
     <Compile Include="StringFormatterAttributes\IStringFormatterAttribute.cs" />
+    <Compile Include="StringFormatterAttributes\LengthAttribute.cs" />
     <Compile Include="UpdateStrategies\DoNothingUpdate.cs" />
     <Compile Include="UpdateStrategies\IUpdateStrategy.cs" />
     <Compile Include="UpdateStrategies\SqlUpdateWithDapper.cs" />

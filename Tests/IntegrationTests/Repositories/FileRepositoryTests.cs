@@ -56,6 +56,50 @@ namespace Tests.IntegrationTests.Repositories
 		}
 
 		[TestFixture]
+		public class When_applying_a_string_format_attribute : FileRepositoryTests
+		{
+			[Test]
+			public void the_formatting_should_be_applied()
+			{
+				// Arrange
+				deleteTestFiles();
+
+				var config = new FileRepositoryConfigBuilder(".")
+					.WithFileExtension(TestFileExtension)
+					.WithFileDelimitor(",")
+					.WithFieldQualifier("\"")
+					.Build();
+				var blog = new BlogWithAttribute
+				{
+					Title = "Future Time Saver Log",
+					Author = "Gary Brunton",
+					CreatedDate = DateTime.Now
+				};
+
+				// Act
+				using (var repo = config.BuildRepository())
+				{
+					repo.Insert(blog);
+				}
+
+				File.Copy("BlogWithAttribute" + TestFileExtension, "BlogWithStringOnlyProperties" + TestFileExtension);
+
+				IEnumerable<BlogWithStringOnlyProperties> blogs;
+				using (var repo = config.BuildRepository())
+				{
+					blogs = repo.GetAll<BlogWithStringOnlyProperties>();
+				}
+
+				// Assert
+				var fromFile = blogs.Single();
+				Assert.AreEqual(blog.Id, fromFile.Id);
+				Assert.AreEqual(blog.Title.PadRight(50), fromFile.Title);
+				Assert.AreEqual(blog.Author.PadLeft(25), fromFile.Author);
+				Assert.AreEqual("        ", fromFile.ModifiedDate);
+			} 
+		}
+
+		[TestFixture]
 		public class When_declaring_output_conventions : FileRepositoryTests
 		{
 			[Test]
