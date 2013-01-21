@@ -21,10 +21,10 @@ namespace CacheRepository.EntityRetrieverStrategies
 		public IEnumerable<dynamic> GetAll<TEntity>(string queryString) where TEntity : class
 		{
 			var entities = new List<dynamic>();
-			var entityName = typeof (TEntity).Name;
+			var entityType = typeof (TEntity);
 			while (true)
 			{
-				var line = this.connectionResolver.GetLine(entityName);
+				var line = this.connectionResolver.GetLine(entityType);
 				if (string.IsNullOrEmpty(line)) break;
 				entities.Add(this.fileEntityFactoryStrategy.Create<TEntity>(line));
 			}

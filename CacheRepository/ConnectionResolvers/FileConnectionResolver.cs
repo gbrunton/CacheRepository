@@ -6,41 +6,41 @@ namespace CacheRepository.ConnectionResolvers
 {
 	public class FileConnectionResolver : IConnectionResolver, IFileConnectionResolver
 	{
-		private readonly Cache<string, StreamReader> streamReaderCache;
-		private readonly Cache<string, StreamWriter> streamWriterCache;
-		private readonly Cache<string, bool> doesFileExistCache;
+		private readonly Cache<Type, StreamReader> streamReaderCache;
+		private readonly Cache<Type, StreamWriter> streamWriterCache;
+		private readonly Cache<Type, bool> doesFileExistCache;
 
 		public FileConnectionResolver(FilePathResolver filePathResolver)
 		{
 			if (filePathResolver == null) throw new ArgumentNullException("filePathResolver");
-			this.doesFileExistCache = new Cache<string, bool>
+			this.doesFileExistCache = new Cache<Type, bool>
 				{
 					OnMissing = name => File.Exists(filePathResolver.GetPathToFile(name))
 				};
 
-			this.streamReaderCache = new Cache<string, StreamReader>
+			this.streamReaderCache = new Cache<Type, StreamReader>
 				{
 					OnMissing = name => File.OpenText(filePathResolver.GetPathToFile(name))
 				};
 
-			this.streamWriterCache = new Cache<string, StreamWriter>
+			this.streamWriterCache = new Cache<Type, StreamWriter>
 			{
 				OnMissing = name => File.CreateText(filePathResolver.GetPathToFile(name))
 			};
 		}
 
-		public string GetLine(string entityName)
+		public string GetLine(Type entityType)
 		{
-			return !this.doesFileExistCache[entityName] 
+			return !this.doesFileExistCache[entityType] 
 				? null 
-				: this.streamReaderCache[entityName].ReadLine();
+				: this.streamReaderCache[entityType].ReadLine();
 		}
 
 		public void WriteLine<TEntity>(string line)
 		{
-			var entityName = typeof (TEntity).Name;
-			this.doesFileExistCache[entityName] = true;
-			this.streamWriterCache[entityName].WriteLine(line);
+			var entityType = typeof (TEntity);
+			this.doesFileExistCache[entityType] = true;
+			this.streamWriterCache[entityType].WriteLine(line);
 		}
 
 		public void Dispose()

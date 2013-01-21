@@ -69,6 +69,7 @@
     <Compile Include="Configuration\Configs\IRepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\RepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\SqlRepositoryConfig.cs" />
+    <Compile Include="Configuration\EntityPropertiesForFile.cs" />
     <Compile Include="ConnectionResolvers\FileConnectionResolver.cs" />
     <Compile Include="ConnectionResolvers\FilePathResolver.cs" />
     <Compile Include="ConnectionResolvers\IConnectionResolver.cs" />

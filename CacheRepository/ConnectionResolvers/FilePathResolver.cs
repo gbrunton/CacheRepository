@@ -1,25 +1,28 @@
 ﻿using System;
 using System.IO;
+using CacheRepository.Configuration;
+using CacheRepository.Configuration.Builders;
 using FubuCore.Util;
 
 namespace CacheRepository.ConnectionResolvers
 {
 	public class FilePathResolver
 	{
-		private readonly Cache<string, string> pathCache;
+		private readonly Cache<Type, string> pathCache;
 
-		public FilePathResolver(string rootPathFolder, string fileExtension)
+		public FilePathResolver(Cache<Type,EntityPropertiesForFile> entityPropertiesForFilesCache, string rootPathFolder, string fileExtension)
 		{
+			if (entityPropertiesForFilesCache == null) throw new ArgumentNullException("entityPropertiesForFilesCache");
 			if (rootPathFolder == null) throw new ArgumentNullException("rootPathFolder");
-			this.pathCache = new Cache<string, string>
+			this.pathCache = new Cache<Type, string>
 			{
-				OnMissing = entityName => Path.Combine(rootPathFolder, entityName + fileExtension)
+				OnMissing = entityType => Path.Combine(rootPathFolder, entityPropertiesForFilesCache[entityType].GetFileName() + fileExtension)
 			};
 		}
 
-		public string GetPathToFile(string entityName)
+		public string GetPathToFile(Type entityType)
 		{
-			return this.pathCache[entityName];
+			return this.pathCache[entityType];
 		}
 	}
 }

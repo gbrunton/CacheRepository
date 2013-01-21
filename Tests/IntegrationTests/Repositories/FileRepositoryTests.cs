@@ -112,7 +112,7 @@ namespace Tests.IntegrationTests.Repositories
 					.WithFileExtension(TestFileExtension)
 					.WithFileDelimitor(",")
 					.WithFieldQualifier("\"")
-					.WithOutputConventsions(new DateTimeToyyyyMMdd())
+					.WithOutputConventions(new DateTimeToyyyyMMdd())
 					.Build();
 				var blog = new Blog
 				{

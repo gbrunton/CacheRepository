@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CacheRepository.Configuration.Configs;
 using CacheRepository.ConnectionResolvers;
 using CacheRepository.DisposeStrategies;
@@ -9,6 +10,7 @@ using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.OutputConventions;
 using CacheRepository.SetIdStrategy;
+using FubuCore.Util;
 
 namespace CacheRepository.Configuration.Builders
 {
@@ -25,6 +27,7 @@ namespace CacheRepository.Configuration.Builders
 		private IEnumerable<IOutputConvention> outputConventions;
 		private string delimitor;
 		private string fieldQualifier;
+		private Cache<Type, EntityPropertiesForFile> entityPropertiesForFiles;
 
 		public FileRepositoryConfigBuilder(string rootPathFolder)
 		{
@@ -37,11 +40,13 @@ namespace CacheRepository.Configuration.Builders
 			this.nextIdStrategy = new SmartNextIdRetreiver();
 			this.setIdStrategy = new SmartEntityIdSetter();
 			this.outputConventions = new List<IOutputConvention>();
+			this.entityPropertiesForFiles = new Cache<Type, EntityPropertiesForFile>();
 		}
 
 		public FileRepositoryConfig Build()
 		{
-			var filePathResolver = new FilePathResolver(this.rootPathFolder, this.fileExtension);
+			this.entityPropertiesForFiles.OnMissing = entityType => new EntityPropertiesForFile(entityType);
+			var filePathResolver = new FilePathResolver(this.entityPropertiesForFiles, this.rootPathFolder, this.fileExtension);
 			var connectionResolver = new FileConnectionResolver(filePathResolver);
 			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
 			this.insertStrategy = this.insertStrategy ?? new FileInsert(connectionResolver, this.outputConventions, this.delimitor, this.fieldQualifier);
@@ -91,13 +96,13 @@ namespace CacheRepository.Configuration.Builders
 			return this;
 		}
 
-		public FileRepositoryConfigBuilder WithOutputConventsions(IEnumerable<IOutputConvention> newValue)
+		public FileRepositoryConfigBuilder WithOutputConventions(IEnumerable<IOutputConvention> newValue)
 		{
 			this.outputConventions = newValue ?? new List<IOutputConvention>();
 			return this;
 		}
 
-		public FileRepositoryConfigBuilder WithOutputConventsions(params IOutputConvention[] newValue)
+		public FileRepositoryConfigBuilder WithOutputConventions(params IOutputConvention[] newValue)
 		{
 			this.outputConventions = newValue;
 			return this;
@@ -118,6 +123,17 @@ namespace CacheRepository.Configuration.Builders
 		public FileRepositoryConfigBuilder WithSetIdStrategy(ISetIdStrategy newValue)
 		{
 			this.setIdStrategy = newValue;
+			return this;
+		}
+
+		public FileRepositoryConfigBuilder WithEntityPropertiesForFiles(IEnumerable<EntityPropertiesForFile> newValue)
+		{
+			if (newValue == null) throw new ArgumentNullException("newValue");
+			this.entityPropertiesForFiles = new Cache<Type, EntityPropertiesForFile>
+				(
+					newValue
+					.ToDictionary(entityPropertiesForFiles => entityPropertiesForFiles.EntityType, entityPropertiesForFiles => entityPropertiesForFiles)
+				);
 			return this;
 		}
 	}
