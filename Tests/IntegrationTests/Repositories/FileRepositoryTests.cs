@@ -12,6 +12,7 @@ namespace Tests.IntegrationTests.Repositories
 	public class FileRepositoryTests
 	{
 		private const string TestFileExtension = ".test.txt";
+
 		[TestFixture]
 		public class When_writing_and_reading_an_entity_to_file : FileRepositoryTests
 		{
@@ -142,6 +143,59 @@ namespace Tests.IntegrationTests.Repositories
 				Assert.AreEqual(blog.Author, fromFile.Author);
 				Assert.AreEqual(blog.CreatedDate.ToString("yyyyMMdd"), fromFile.CreatedDate);
 				Assert.AreEqual(blog.ModifiedDate, fromFile.ModifiedDate);
+			}
+		}
+
+		[TestFixture]
+		public class When_writing_to_a_file_that_already_exists : FileRepositoryTests
+		{
+			[Test]
+			public void inserts_should_be_allowed()
+			{
+				// Arrange
+				deleteTestFiles();
+				var configBuilder = new FileRepositoryConfigBuilder(".")
+					.WithFileExtension(TestFileExtension)
+					.WithFileDelimitor(",")
+					.WithFieldQualifier("\"");
+				var config = configBuilder.Build();
+				var blog = new Blog
+				{
+					Title = "Future Time Saver Log",
+					Author = "Gary Brunton",
+					CreatedDate = DateTime.Now
+				};
+
+				using (var repo = config.BuildRepository())
+				{
+					repo.Insert(blog);
+				}
+
+				// Act
+				configBuilder = new FileRepositoryConfigBuilder(".")
+					.WithFileExtension(TestFileExtension)
+					.WithFileDelimitor(",")
+					.WithFieldQualifier("\"");
+				using (var repo = configBuilder.Build().BuildRepository())
+				{
+					repo.Insert(blog);
+				}
+
+				// Assert
+				IEnumerable<Blog> blogsFromFile;
+				configBuilder = new FileRepositoryConfigBuilder(".")
+					.WithFileExtension(TestFileExtension)
+					.WithFileDelimitor(",")
+					.WithFieldQualifier("\"");
+				using (var repo = configBuilder.Build().BuildRepository())
+				{
+					blogsFromFile = repo.GetAll<Blog>();
+				}
+
+				Assert.AreEqual(2, blog.Id);
+				Assert.AreEqual(2, blogsFromFile.Count());
+				Assert.IsTrue(blogsFromFile.Any(x => x.Id == 1));
+				Assert.IsTrue(blogsFromFile.Any(x => x.Id == 2));
 			}
 		}
 

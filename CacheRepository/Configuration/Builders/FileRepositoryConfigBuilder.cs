@@ -47,7 +47,7 @@ namespace CacheRepository.Configuration.Builders
 		{
 			this.entityPropertiesForFiles.OnMissing = entityType => new EntityPropertiesForFile(entityType);
 			var filePathResolver = new FilePathResolver(this.entityPropertiesForFiles, this.rootPathFolder, this.fileExtension);
-			var connectionResolver = new FileConnectionResolver(filePathResolver);
+			var connectionResolver = new FileConnectionResolver(this.entityPropertiesForFiles, filePathResolver);
 			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
 			this.insertStrategy = this.insertStrategy ?? new FileInsert(connectionResolver, this.outputConventions, this.delimitor, this.fieldQualifier);
 			this.fileEntityFactoryStrategy = this.fileEntityFactoryStrategy ?? 

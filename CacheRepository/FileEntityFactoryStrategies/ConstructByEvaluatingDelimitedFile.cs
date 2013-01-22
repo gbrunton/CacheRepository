@@ -28,7 +28,11 @@ namespace CacheRepository.FileEntityFactoryStrategies
 				var propertyInfo = propertyInfos[i];
 				var valueAsString = splitLine[i].Trim(this.fieldQualifier);
 				if (string.IsNullOrEmpty(valueAsString)) continue;
-				var convertedValue = Convert.ChangeType(valueAsString, propertyInfo.PropertyType);
+
+				var convertedValue = propertyInfo.PropertyType == typeof (Guid) 
+					? Guid.Parse(valueAsString)
+					: Convert.ChangeType(valueAsString, propertyInfo.PropertyType);
+ 
 				propertyInfo.SetValue(entity, convertedValue);
 			}
 

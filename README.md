@@ -1,8 +1,10 @@
 # CacheRepository
 
-A repository that caches data in memory and allows you to use indexes to query data quickly. By default, [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) is used internally for relational database support. This means that many of the same configuration features and [conventions](https://github.com/tmsmith/Dapper-Extensions/blob/master/readme.md#naming-conventions) available in Dapper-Extensions applies to CacheRepository as well. 
+A repository that caches data in memory and allows you to use indexes to query data quickly. 
 
-CacheRepository also supports text files as data sources.
+By default, [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) is used internally for relational database support. This means that many of the same configuration features and [conventions](https://github.com/tmsmith/Dapper-Extensions/blob/master/readme.md#naming-conventions) available in Dapper-Extensions applies to CacheRepository as well. 
+
+CacheRepository also supports text files as data sources. It can read from delimited and fixed width files and write to them as well with little configuration.
 
 I mostly use CacheRepository library within [ETL](http://en.wikipedia.org/wiki/Extract,_transform,_load) programs that I write when it is necessary to be fast and when I will very likely be moving large amounts of data around.
 
@@ -14,7 +16,9 @@ See the following for more details
 
 ## Features
 
-* Repository can query both relational databases and file based data sources using the same api
+* Repository can query both relational databases and file based data sources using the same (or very similar) api
+
+* Insert into and read from delimited and fixed width text files
 
 * Create in memory indexes 
 
@@ -50,6 +54,8 @@ public class Blog
 
 ## Insert
 
+Insert into sql database
+
 ```c#
 IDbConnection connection = new SqlConnection(@"data source=....");
 var config = new SqlRepositoryConfigBuilder(connection).Build();
@@ -63,6 +69,25 @@ using (var repository = config.BuildRepository())
 		};
 	repository.Insert(blog);
 	repository.Commit();
+}
+```
+
+Insert into comma delimited text file
+
+```c#
+var config = new FileRepositoryConfigBuilder(@"c:\folderContainingFiles")
+	.WithFileDelimitor(",")
+	.WithFieldQualifier("\"")
+	.Build();
+using (var repository = config.BuildRepository())
+{
+	var blog = new Blog
+	{
+		Title = "Future Time Saver Log",
+		Author = "Gary Brunton",
+		CreatedDate = DateTime.Now
+	};
+	repository.Insert(blog);
 }
 ```
 
@@ -120,6 +145,8 @@ using (var repository = config.BuildRepository())
 
 ## In Memory Linq
 
+This would load all 5000000 entities into memory which may be or may not be what you want.
+
 ```c#
 using (var repository = config.BuildRepository())
 {
@@ -129,9 +156,9 @@ using (var repository = config.BuildRepository())
 }
 ```
 
-This would load all 5000000 entities into memory which may be or may not be what you want.
-
 We can customize the dynamic "GetAll" sql but adding CustomEntitySql for a given entity type. 
+
+The following will ensure that the GetAll method only loads 100 entities into memory.
 
 ```c#
 var config = new SqlRepositoryConfigBuilder(connection)
@@ -142,8 +169,6 @@ using (var repository = config.BuildRepository())
 	var blogs = repository.GetAll<Blog>();
 }
 ```
-
-Now our GetAll method only loads 100 entities into memory.
 
 ## In Memory Indexes
 
@@ -197,7 +222,7 @@ using (var repository = config.BuildRepository())
 
 These in memory Linq statements and in memory indexes work on the FileRepository in the exact same way as they work on the SqlRepository.
 
-I've included some basic support to build up and query text files with the same API. Right now you can use the [ConstructorContainsLine](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/FileEntityFactoryStrategies/ConstructorContainsLine.cs) type to build entities by defining an action from within a constructor.
+I've included some basic support to build up and query text files with the same API. By default if you don't specify a delimitor the [ConstructorContainsLine](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/FileEntityFactoryStrategies/ConstructorContainsLine.cs) type is used to build entities by defining an action from within a constructor.
 
 ```c#
 public class Blog

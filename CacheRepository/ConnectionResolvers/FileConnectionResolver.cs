@@ -1,31 +1,55 @@
 ﻿using System;
 using System.IO;
+using CacheRepository.Configuration;
 using FubuCore.Util;
 
 namespace CacheRepository.ConnectionResolvers
 {
 	public class FileConnectionResolver : IConnectionResolver, IFileConnectionResolver
 	{
-		private readonly Cache<Type, StreamReader> streamReaderCache;
-		private readonly Cache<Type, StreamWriter> streamWriterCache;
+		private readonly Cache<Type, StreamContainer> streamReaderCache;
+		private readonly Cache<Type, StreamContainer> streamWriterCache;
 		private readonly Cache<Type, bool> doesFileExistCache;
 
-		public FileConnectionResolver(FilePathResolver filePathResolver)
+		public FileConnectionResolver(Cache<Type, EntityPropertiesForFile> entityPropertiesForFiles, FilePathResolver filePathResolver)
 		{
+			if (entityPropertiesForFiles == null) throw new ArgumentNullException("entityPropertiesForFiles");
 			if (filePathResolver == null) throw new ArgumentNullException("filePathResolver");
 			this.doesFileExistCache = new Cache<Type, bool>
 				{
-					OnMissing = name => File.Exists(filePathResolver.GetPathToFile(name))
+					OnMissing = entityType => File.Exists(filePathResolver.GetPathToFile(entityType))
 				};
 
-			this.streamReaderCache = new Cache<Type, StreamReader>
-				{
-					OnMissing = name => File.OpenText(filePathResolver.GetPathToFile(name))
-				};
-
-			this.streamWriterCache = new Cache<Type, StreamWriter>
+			this.streamReaderCache = new Cache<Type, StreamContainer>
 			{
-				OnMissing = name => File.CreateText(filePathResolver.GetPathToFile(name))
+				OnMissing = entityType =>
+					{
+						var fileStream = new FileStream(filePathResolver.GetPathToFile(entityType), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+						return new StreamContainer
+							{
+								FileStream = fileStream,
+								StreamReader = new StreamReader(fileStream)
+							};
+					}
+			};
+
+			this.streamWriterCache = new Cache<Type, StreamContainer>
+			{
+				OnMissing = entityType =>
+					{
+						var fileStream = new FileStream
+							(
+								filePathResolver.GetPathToFile(entityType), 
+								entityPropertiesForFiles[entityType].GetFileMode(), 
+								FileAccess.Write, 
+								FileShare.Read
+							);
+						return new StreamContainer
+							{
+								FileStream = fileStream,
+								StreamWriter = new StreamWriter(fileStream)
+							};
+					}
 			};
 		}
 
@@ -33,20 +57,34 @@ namespace CacheRepository.ConnectionResolvers
 		{
 			return !this.doesFileExistCache[entityType] 
 				? null 
-				: this.streamReaderCache[entityType].ReadLine();
+				: this.streamReaderCache[entityType].StreamReader.ReadLine();
 		}
 
 		public void WriteLine<TEntity>(string line)
 		{
 			var entityType = typeof (TEntity);
+			this.streamWriterCache[entityType].StreamWriter.WriteLine(line);
 			this.doesFileExistCache[entityType] = true;
-			this.streamWriterCache[entityType].WriteLine(line);
 		}
 
 		public void Dispose()
 		{
 			this.streamReaderCache.Each(x => x.Dispose());
 			this.streamWriterCache.Each(x => x.Dispose());
+		}
+
+		private class StreamContainer : IDisposable
+		{
+			public FileStream FileStream { private get; set; }
+			public StreamReader StreamReader { get; set; }
+			public StreamWriter StreamWriter { get; set; }
+
+			public void Dispose()
+			{
+				if (this.StreamReader != null) this.StreamReader.Dispose();
+				if (this.StreamWriter != null) this.StreamWriter.Dispose();
+				this.FileStream.Dispose();
+			}
 		}
 	}
 }
