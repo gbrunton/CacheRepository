@@ -4,7 +4,7 @@ A repository that caches data in memory and allows you to use indexes to query d
 
 By default, [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) is used internally for relational database support. This means that many of the same configuration features and [conventions](https://github.com/tmsmith/Dapper-Extensions/blob/master/readme.md#naming-conventions) available in Dapper-Extensions applies to CacheRepository as well. 
 
-CacheRepository also supports text files as data sources. It can read from delimited and fixed width files and write to them as well with little configuration.
+CacheRepository also supports text files as data sources. It can read from both delimited and fixed width files and write to them as well with little configuration.
 
 I mostly use CacheRepository library within [ETL](http://en.wikipedia.org/wiki/Extract,_transform,_load) programs that I write when it is necessary to be fast and when I will very likely be moving large amounts of data around.
 
@@ -12,13 +12,15 @@ See the following for more details
 
 [CacheRepository Introduction (Why I Made It)](http://gbrunton.blogspot.com/2013/01/cacherepository-introduction-why-i-made.html)
 
+[CacheRepository Use Case - Reading From (Somewhat) Unstructured Text File](http://gbrunton.blogspot.com/2013/01/cacherepository-use-case-reading-from.html)
+
 [Writing To And Reading From Text File](https://github.com/gbrunton/CacheRepository/blob/master/Tests/IntegrationTests/Repositories/FileRepositoryTests.cs)
 
 ## Features
 
 * Repository can query both relational databases and file based data sources using the same (or very similar) api
 
-* Insert into and read from delimited and fixed width text files
+* Insert into and read from both delimited and fixed width text files
 
 * Create in memory indexes 
 
