@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.3] Added the ability to insert lines into existing text files by either overwriting or appending.
+    <releaseNotes>[1.3.1] Updated FubuCore to 1.0.0.225 version.
+[1.3] Added the ability to insert lines into existing text files by either overwriting or appending.
 [1.2] Expanded the FileRepository's API to now allow you to insert lines into text files. 
 [1.1] Made entity id configuration not necessary for most cases.  
 [1.0] This is the initial release of the library.</releaseNotes>
