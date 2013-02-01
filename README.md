@@ -93,7 +93,7 @@ using (var repository = config.BuildRepository())
 }
 ```
 
-## Bulk Insert (On SqlRepository only)
+## Bulk Insert (SqlRepository only)
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -121,7 +121,7 @@ using (var repository = config.BuildRepository())
 
 On my laptop, this completed in 1.7 minutes.
 
-## Sql Queries (On SqlRepository only)
+## Sql Queries (SqlRepository only)
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -133,7 +133,7 @@ using (var repository = config.BuildRepository())
 
 This is basically the same API that [Dapper-Extensions](https://github.com/tmsmith/Dapper-Extensions) uses but I'm doing it on the repository and not direction on the connection.
 
-## Update (On SqlRepository only)
+## Update (SqlRepository only)
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -145,9 +145,9 @@ using (var repository = config.BuildRepository())
 }
 ```
 
-## In Memory Linq
+## GetAll
 
-This would load all 5000000 entities into memory which may be or may not be what you want.
+Use GetAll to retrieve and cache all entities of the given type from the repository. Once the entities are loaded, if you call it again a round trip to the database will not be performed. Instead the data will be retrieved from cache (memory).
 
 ```c#
 using (var repository = config.BuildRepository())
@@ -157,6 +157,8 @@ using (var repository = config.BuildRepository())
 					.Where(x => x.Author == "Gary Brunton");
 }
 ```
+
+## Customized GetAll (SqlRepository only)
 
 We can customize the dynamic "GetAll" sql but adding CustomEntitySql for a given entity type. 
 
