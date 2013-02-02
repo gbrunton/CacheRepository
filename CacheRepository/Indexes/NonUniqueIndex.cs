@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.Indexes
 {

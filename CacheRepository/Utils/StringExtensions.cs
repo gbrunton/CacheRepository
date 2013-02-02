@@ -1,4 +1,6 @@
-﻿namespace CacheRepository.StaticUtils
+﻿using System;
+
+namespace CacheRepository.Utils
 {
 	public static class StringExtensions
 	{
@@ -21,6 +23,11 @@
 			return !source.EndsWith(valueToTrim) 
 				? source 
 				: source.Remove(source.LastIndexOf(valueToTrim));
+		}
+
+		public static string ToFormat(this string stringFormat, params object[] args)
+		{
+			return String.Format(stringFormat, args);
 		}
 	}
 }

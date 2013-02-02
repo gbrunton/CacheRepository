@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CacheRepository.Indexes;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.Behaviours
 {

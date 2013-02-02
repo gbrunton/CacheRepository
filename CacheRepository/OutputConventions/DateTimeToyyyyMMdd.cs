@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.OutputConventions
 {

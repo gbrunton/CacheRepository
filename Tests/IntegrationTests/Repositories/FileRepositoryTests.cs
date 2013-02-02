@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using CacheRepository.Configuration.Builders;
 using CacheRepository.OutputConventions;
+using CacheRepository.Utils;
 using NUnit.Framework;
 using Tests.Entities;
 

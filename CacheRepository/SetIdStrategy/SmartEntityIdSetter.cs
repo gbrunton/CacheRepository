@@ -1,5 +1,5 @@
 ﻿using System;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.SetIdStrategy
 {

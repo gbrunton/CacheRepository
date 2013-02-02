@@ -10,7 +10,7 @@ using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.OutputConventions;
 using CacheRepository.SetIdStrategy;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.Configuration.Builders
 {

@@ -9,7 +9,7 @@ using CacheRepository.ExecuteSqlStrategies;
 using CacheRepository.Indexes;
 using CacheRepository.QueryStrategies;
 using CacheRepository.UpdateStrategies;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.Repositories
 {

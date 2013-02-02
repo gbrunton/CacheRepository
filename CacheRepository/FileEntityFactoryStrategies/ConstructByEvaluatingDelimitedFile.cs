@@ -1,5 +1,5 @@
 ﻿using System;
-using CacheRepository.StaticUtils;
+using CacheRepository.Utils;
 
 namespace CacheRepository.FileEntityFactoryStrategies
 {

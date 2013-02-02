@@ -5,7 +5,7 @@ using System.Reflection;
 using CacheRepository.Behaviours;
 using CacheRepository.Configuration.Configs;
 using CacheRepository.Indexes;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.Repositories
 {

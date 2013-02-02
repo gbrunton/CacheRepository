@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CacheRepository.ConnectionResolvers;
+using CacheRepository.Utils;
 using Dapper;
-using FubuCore;
 
 namespace CacheRepository.EntityRetrieverStrategies
 {

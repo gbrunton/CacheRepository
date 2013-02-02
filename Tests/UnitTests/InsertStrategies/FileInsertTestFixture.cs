@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CacheRepository.ConnectionResolvers;
 using CacheRepository.InsertStrategies;
 using CacheRepository.OutputConventions;
-using FubuCore;
+using CacheRepository.Utils;
 using NUnit.Framework;
 using Tests.Entities;
 

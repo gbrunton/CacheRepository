@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using CacheRepository.Configuration;
-using FubuCore.Util;
+using CacheRepository.Utils;
 
 namespace CacheRepository.ConnectionResolvers
 {
