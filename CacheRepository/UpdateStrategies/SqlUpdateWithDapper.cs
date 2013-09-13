@@ -6,9 +6,9 @@ namespace CacheRepository.UpdateStrategies
 {
 	public class SqlUpdateWithDapper : IUpdateStrategy
 	{
-		private readonly SqlConnectionResolver connectionResolver;
+		private readonly ISqlConnectionResolver connectionResolver;
 
-		public SqlUpdateWithDapper(SqlConnectionResolver connectionResolver)
+		public SqlUpdateWithDapper(ISqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;

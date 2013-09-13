@@ -3,7 +3,7 @@ using System.Data;
 
 namespace CacheRepository.ConnectionResolvers
 {
-	public class SqlConnectionResolver : IConnectionResolver
+	public class SqlConnectionResolver : ISqlConnectionResolver
 	{
 		private readonly IDbConnection connection;
 		private IDbTransaction transaction;

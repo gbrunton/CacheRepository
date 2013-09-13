@@ -6,9 +6,9 @@ namespace CacheRepository.ExecuteSqlStrategies
 {
 	public class ExecuteSqlWithDapper : IExecuteSqlStrategy
 	{
-		private readonly SqlConnectionResolver sqlConnectionResolver;
+		private readonly ISqlConnectionResolver sqlConnectionResolver;
 
-		public ExecuteSqlWithDapper(SqlConnectionResolver sqlConnectionResolver)
+		public ExecuteSqlWithDapper(ISqlConnectionResolver sqlConnectionResolver)
 		{
 			if (sqlConnectionResolver == null) throw new ArgumentNullException("sqlConnectionResolver");
 			this.sqlConnectionResolver = sqlConnectionResolver;

@@ -32,6 +32,7 @@ namespace CacheRepository.Configuration.Builders
 		private IQueryStrategy queryStrategy;
 		private ISetIdStrategy setIdStrategy;
 		private IUpdateStrategy updateStrategy;
+		private ISqlConnectionResolver connectionResolver;
 
 		public SqlRepositoryConfigBuilder(IDbConnection connection)
 		{
@@ -45,7 +46,7 @@ namespace CacheRepository.Configuration.Builders
 
 		public SqlRepositoryConfig Build()
 		{
-			var connectionResolver = new SqlConnectionResolver(this.connection);
+			this.connectionResolver = this.connectionResolver ?? new SqlConnectionResolver(this.connection);
 			this.bulkInsertStrategy = this.bulkInsertStrategy ?? new SqlServerBulkInsert(connectionResolver);
 			this.commitStrategy = this.commitStrategy ?? new CommitSqlConnection(connectionResolver);
 			this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver);
@@ -69,6 +70,12 @@ namespace CacheRepository.Configuration.Builders
 					SetIdStrategy = this.setIdStrategy,
 					UpdateStrategy = this.updateStrategy
 				};
+		}
+
+		public SqlRepositoryConfigBuilder WithConnectionResolver(ISqlConnectionResolver newValue)
+		{
+			this.connectionResolver = newValue;
+			return this;
 		}
 
 		public SqlRepositoryConfigBuilder WithNextIdStrategy(INextIdStrategy newValue)

@@ -10,9 +10,9 @@ namespace CacheRepository.BulkInsertStrategies
 {
 	public class SqlServerBulkInsert : IBulkInsertStrategy
 	{
-		private readonly SqlConnectionResolver connectionResolver;
+		private readonly ISqlConnectionResolver connectionResolver;
 
-		public SqlServerBulkInsert(SqlConnectionResolver connectionResolver)
+		public SqlServerBulkInsert(ISqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;

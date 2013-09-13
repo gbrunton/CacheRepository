@@ -8,9 +8,9 @@ namespace CacheRepository.EntityRetrieverStrategies
 {
 	public class SqlEntityRetrieverStrategy : IEntityRetrieverStrategy
 	{
-		private readonly SqlConnectionResolver connectionResolver;
+		private readonly ISqlConnectionResolver connectionResolver;
 
-		public SqlEntityRetrieverStrategy(SqlConnectionResolver connectionResolver)
+		public SqlEntityRetrieverStrategy(ISqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;

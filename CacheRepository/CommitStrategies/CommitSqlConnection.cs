@@ -5,9 +5,9 @@ namespace CacheRepository.CommitStrategies
 {
 	public class CommitSqlConnection : ICommitStrategy
 	{
-		private readonly SqlConnectionResolver sqlConnectionResolver;
+		private readonly ISqlConnectionResolver sqlConnectionResolver;
 
-		public CommitSqlConnection(SqlConnectionResolver sqlConnectionResolver)
+		public CommitSqlConnection(ISqlConnectionResolver sqlConnectionResolver)
 		{
 			if (sqlConnectionResolver == null) throw new ArgumentNullException("sqlConnectionResolver");
 			this.sqlConnectionResolver = sqlConnectionResolver;

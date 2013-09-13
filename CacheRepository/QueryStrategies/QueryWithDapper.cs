@@ -7,9 +7,9 @@ namespace CacheRepository.QueryStrategies
 {
 	public class QueryWithDapper : IQueryStrategy
 	{
-		private readonly SqlConnectionResolver sqlConnectionResolver;
+		private readonly ISqlConnectionResolver sqlConnectionResolver;
 
-		public QueryWithDapper(SqlConnectionResolver sqlConnectionResolver)
+		public QueryWithDapper(ISqlConnectionResolver sqlConnectionResolver)
 		{
 			if (sqlConnectionResolver == null) throw new ArgumentNullException("sqlConnectionResolver");
 			this.sqlConnectionResolver = sqlConnectionResolver;

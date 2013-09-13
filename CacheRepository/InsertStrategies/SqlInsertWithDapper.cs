@@ -8,9 +8,9 @@ namespace CacheRepository.InsertStrategies
 {
 	public class SqlInsertWithDapper : IInsertStrategy
 	{
-		private readonly SqlConnectionResolver connectionResolver;
+		private readonly ISqlConnectionResolver connectionResolver;
 
-		public SqlInsertWithDapper(SqlConnectionResolver connectionResolver)
+		public SqlInsertWithDapper(ISqlConnectionResolver connectionResolver)
 		{
 			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
 			this.connectionResolver = connectionResolver;
