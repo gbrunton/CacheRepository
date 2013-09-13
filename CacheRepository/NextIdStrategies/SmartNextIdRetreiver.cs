@@ -5,8 +5,8 @@ namespace CacheRepository.NextIdStrategies
 {
 	public class SmartNextIdRetreiver : INextIdStrategy
 	{
-		private readonly Cache<Type, Func<dynamic, dynamic>> entityIdCache;
-		private readonly Cache<Type, Func<Type, dynamic, dynamic>> propertyTypeGetNextIdFunctionCache;
+		private readonly Cache<Type, Func<Func<dynamic>, dynamic>> entityIdCache;
+		private readonly Cache<Type, Func<Type, Func<dynamic>, dynamic>> propertyTypeGetNextIdFunctionCache;
 
 		public SmartNextIdRetreiver() : this("Id")
 		{
@@ -14,7 +14,7 @@ namespace CacheRepository.NextIdStrategies
 
 		public SmartNextIdRetreiver(string idPropertyName)
 		{
-			this.entityIdCache = new Cache<Type, Func<dynamic, dynamic>>
+			this.entityIdCache = new Cache<Type, Func<Func<dynamic>, dynamic>>
 				{
 					OnMissing = entityType => currentMaxId =>
 						{
@@ -25,24 +25,24 @@ namespace CacheRepository.NextIdStrategies
 						}
 				};
 
-			this.propertyTypeGetNextIdFunctionCache = new Cache<Type, Func<Type, dynamic, dynamic>>()
+			this.propertyTypeGetNextIdFunctionCache = new Cache<Type, Func<Type, Func<dynamic>, dynamic>>()
 			{
 				OnMissing = propertyType =>
 				{
 					if (propertyType == typeof(int) || propertyType == typeof(long))
 					{
-						return (entityType, currentMaxId) => currentMaxId == null ? 1 : currentMaxId + 1;
+						return (entityType, currentMaxId) => currentMaxId == null || currentMaxId() == null ? 1 : currentMaxId() + 1;
 					}
 					if (propertyType == typeof(string))
 					{
 						return (entityType, currentMaxId) =>
 							{
 								var entityName = entityType.Name;
-								if (string.IsNullOrEmpty(currentMaxId))
+								if (string.IsNullOrEmpty(currentMaxId()))
 								{
 									return entityName + "-1";
 								}
-								var split = currentMaxId.Split('-');
+								var split = currentMaxId().Split('-');
 								var nextId = long.Parse(split[1]) + 1;
 								return entityName + "-" + nextId;
 							};
@@ -56,9 +56,9 @@ namespace CacheRepository.NextIdStrategies
 			};
 		}
 
-		public dynamic GetNextId(Type type, dynamic currentMaxId)
+		public dynamic GetNextId(Type type, Func<dynamic> getCurrentMaxId)
 		{
-			return this.entityIdCache[type](currentMaxId);
+			return this.entityIdCache[type](getCurrentMaxId);
 		}
 	}
 }

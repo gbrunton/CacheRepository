@@ -4,6 +4,6 @@ namespace CacheRepository.NextIdStrategies
 {
 	public interface INextIdStrategy
 	{
-		dynamic GetNextId(Type type, dynamic currentMaxId);
+		dynamic GetNextId(Type type, Func<dynamic> getCurrentMaxId);
 	}
 }

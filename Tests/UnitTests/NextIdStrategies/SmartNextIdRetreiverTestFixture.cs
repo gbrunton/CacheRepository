@@ -15,7 +15,7 @@ namespace Tests.UnitTests.NextIdStrategies
 				// Arrange
 				
 				// Act
-				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithNoPropertyId), 1);
+				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithNoPropertyId), () => 1);
 
 				// Assert
 				Assert.IsNull(nextId);
@@ -46,7 +46,7 @@ namespace Tests.UnitTests.NextIdStrategies
 				// Arrange
 
 				// Act
-				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithIntType), currentMaxId);
+				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithIntType), () => currentMaxId);
 
 				//Assert
 				Assert.AreEqual(expectedId, nextId);
@@ -64,7 +64,7 @@ namespace Tests.UnitTests.NextIdStrategies
 				// Arrange
 
 				// Act
-				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithLongType), currentMaxId);
+				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithLongType), () => currentMaxId);
 
 				//Assert
 				Assert.AreEqual(expectedId, nextId);
@@ -82,7 +82,7 @@ namespace Tests.UnitTests.NextIdStrategies
 				// Arrange
 
 				// Act
-				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithStringType), currentMaxId);
+				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithStringType), () => currentMaxId);
 
 				//Assert
 				Assert.AreEqual(expectedId, nextId);
@@ -101,7 +101,7 @@ namespace Tests.UnitTests.NextIdStrategies
 				var currentMaxId = isCurrentIdNull ? null as Guid? : Guid.NewGuid();
 
 				// Act
-				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithGuidType), currentMaxId);
+				var nextId = new SmartNextIdRetreiver().GetNextId(typeof(BlogWithIdWithGuidType), () => currentMaxId);
 
 				//Assert
 				Assert.IsNotNull(nextId);
