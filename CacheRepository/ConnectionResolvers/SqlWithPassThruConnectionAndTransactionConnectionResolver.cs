@@ -8,7 +8,7 @@ namespace CacheRepository.ConnectionResolvers
 		private readonly IDbConnection connection;
 		private readonly IDbTransaction transaction;
 
-		internal SqlWithPassThruConnectionAndTransactionConnectionResolver(IDbConnection connection, IDbTransaction transaction)
+		public SqlWithPassThruConnectionAndTransactionConnectionResolver(IDbConnection connection, IDbTransaction transaction)
 		{
 			if (connection == null) throw new ArgumentNullException("connection");
 			if (transaction == null) throw new ArgumentNullException("transaction");
