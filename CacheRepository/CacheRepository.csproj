@@ -121,6 +121,7 @@
     <Compile Include="UpdateStrategies\SqlUpdateWithDapper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CacheRepository.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
