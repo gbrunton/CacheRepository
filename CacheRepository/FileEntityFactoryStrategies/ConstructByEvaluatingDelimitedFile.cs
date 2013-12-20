@@ -33,7 +33,7 @@ namespace CacheRepository.FileEntityFactoryStrategies
 					? Guid.Parse(valueAsString)
 					: Convert.ChangeType(valueAsString, propertyInfo.PropertyType);
  
-				propertyInfo.SetValue(entity, convertedValue);
+				propertyInfo.SetValue(entity, convertedValue, null);
 			}
 
 			return entity;
