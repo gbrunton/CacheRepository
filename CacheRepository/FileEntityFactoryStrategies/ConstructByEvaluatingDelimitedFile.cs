@@ -23,7 +23,11 @@ namespace CacheRepository.FileEntityFactoryStrategies
 			var entity = Activator.CreateInstance(entityType);
 			var propertyInfos = entityType.GetProperties();
 
-			for (var i = 0; i < propertyInfos.Length; i++)
+			var indexLenth = splitLine.Length < propertyInfos.Length
+				? splitLine.Length
+				: propertyInfos.Length;
+
+			for (var i = 0; i < indexLenth; i++)
 			{
 				var propertyInfo = propertyInfos[i];
 				var valueAsString = splitLine[i].Trim(this.fieldQualifier);
