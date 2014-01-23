@@ -13,7 +13,7 @@ namespace CacheRepository.Utils
 
 		public static string TrimStart(this string source, string valueToTrim)
 		{
-			if (string.IsNullOrEmpty(source)) return source;
+			if (string.IsNullOrEmpty(valueToTrim)) return source;
 			return !source.StartsWith(valueToTrim)
 				       ? source
 				       : source.Remove(0, valueToTrim.Length);
@@ -21,7 +21,7 @@ namespace CacheRepository.Utils
  
 		public static string TrimEnd(this string source, string valueToTrim)
 		{
-			if (string.IsNullOrEmpty(source)) return source;
+			if (string.IsNullOrEmpty(valueToTrim)) return source;
 			return !source.EndsWith(valueToTrim) 
 				? source 
 				: source.Remove(source.LastIndexOf(valueToTrim));
