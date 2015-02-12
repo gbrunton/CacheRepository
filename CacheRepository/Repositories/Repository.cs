@@ -26,7 +26,7 @@ namespace CacheRepository.Repositories
 			this.indexesCached = new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
 			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
-			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(key, () => this.getAll(key).Max(x => x.Id)) };
+			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(key, () => this.GetAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 			this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
 		}
@@ -126,7 +126,7 @@ namespace CacheRepository.Repositories
 			var index = (TIndex)this.indexesCached[typeof(TIndex)];
 			if (!index.HasBeenHydrated)
 			{
-				getAll(index.GetEntityType());
+				GetAll(index.GetEntityType());
 				index.HasBeenHydrated = true;
 			}
 			return index;
@@ -162,7 +162,7 @@ namespace CacheRepository.Repositories
 			return this.entitiesCached[type];
 		}
 
-		private List<dynamic> getAll(Type type)
+		public List<dynamic> GetAll(Type type)
 		{
 			var methodInfo = typeof(Repository)
 				.GetMethod("getAllWithGeneric", BindingFlags.NonPublic | BindingFlags.Instance);
