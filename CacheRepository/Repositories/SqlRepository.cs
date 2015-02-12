@@ -92,6 +92,11 @@ namespace CacheRepository.Repositories
 			return this.repository.GetAll<TEntity>();
 		}
 
+		public IEnumerable<dynamic> GetAll(Type entityType)
+		{
+			return this.repository.GetAll(entityType);
+		}
+
 		public TIndex GetIndex<TIndex>() where TIndex : IIndex
 		{
 			return this.repository.GetIndex<TIndex>();

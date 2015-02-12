@@ -31,8 +31,8 @@ namespace CacheRepository.ConnectionResolvers
 
 		public void Dispose()
 		{
-			this.transaction.Dispose();
-			this.connection.Dispose();
+			if (this.transaction != null) this.transaction.Dispose();
+			if (this.connection != null) this.connection.Dispose();
 		}
 
 		public void Commit()
