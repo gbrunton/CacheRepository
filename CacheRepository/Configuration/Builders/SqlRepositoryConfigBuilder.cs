@@ -13,6 +13,7 @@ using CacheRepository.InsertStrategies;
 using CacheRepository.NextIdStrategies;
 using CacheRepository.QueryStrategies;
 using CacheRepository.SetIdStrategy;
+using CacheRepository.SqlQualifierStrategies;
 using CacheRepository.UpdateStrategies;
 
 namespace CacheRepository.Configuration.Builders
@@ -33,8 +34,9 @@ namespace CacheRepository.Configuration.Builders
 		private ISetIdStrategy setIdStrategy;
 		private IUpdateStrategy updateStrategy;
 		private ISqlConnectionResolver connectionResolver;
+	    private ISqlQualifiers sqlQualifiers;
 
-		public SqlRepositoryConfigBuilder(IDbConnection connection)
+	    public SqlRepositoryConfigBuilder(IDbConnection connection)
 		{
 			if (connection == null) throw new ArgumentNullException("connection");
 			this.connection = connection;
@@ -42,6 +44,7 @@ namespace CacheRepository.Configuration.Builders
 			this.customEntitySql = new List<Tuple<Type, string>>();
 			this.nextIdStrategy = new SmartNextIdRetreiver();
 			this.setIdStrategy = new SmartEntityIdSetter();
+	        this.sqlQualifiers = new SqlServerQualifiers();
 		}
 
 		public SqlRepositoryConfig Build()
@@ -49,7 +52,7 @@ namespace CacheRepository.Configuration.Builders
 			this.connectionResolver = this.connectionResolver ?? new SqlConnectionResolver(this.connection);
 			this.bulkInsertStrategy = this.bulkInsertStrategy ?? new SqlServerBulkInsert(connectionResolver);
 			this.commitStrategy = this.commitStrategy ?? new CommitSqlConnection(connectionResolver);
-			this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver);
+			this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver, this.sqlQualifiers);
 			this.executeSqlStrategy = this.executeSqlStrategy ?? new ExecuteSqlWithDapper(connectionResolver);
 			this.insertStrategy = this.insertStrategy ?? new SqlInsertWithDapper(connectionResolver);
 			this.updateStrategy = this.updateStrategy ?? new SqlUpdateWithDapper(connectionResolver);
@@ -107,5 +110,11 @@ namespace CacheRepository.Configuration.Builders
 			this.indexes = newValue;
 			return this;
 		}
+
+        public SqlRepositoryConfigBuilder WithSqlQualifiers(ISqlQualifiers newValue)
+        {
+            this.sqlQualifiers = newValue;
+            return this;
+        }
 	}
 }
