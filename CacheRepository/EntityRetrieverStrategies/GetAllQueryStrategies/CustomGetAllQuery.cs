@@ -27,8 +27,6 @@ namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
                 command.Transaction = transaction;
                 using (var reader = command.ExecuteReader())
                 {
-                    var entity = createEntity();
-                    entities.Add(entity);
                     var tuples = new List<Tuple<int, PropertyInfo>>();
 
                     for (var i = 0; i < reader.FieldCount; i++)
@@ -43,6 +41,9 @@ namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
 
                     while (reader.Read())
                     {
+                        var entity = createEntity();
+                        entities.Add(entity);
+
                         tuples.Each(x =>
                         {
                             object value = null;

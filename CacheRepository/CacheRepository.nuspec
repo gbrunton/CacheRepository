@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.3.16] Created the CustomGetAllQuery because I can't seem to get the Massive one to work like I want.
+    <releaseNotes>[1.3.17] Fixed a bug in the CustomGetAllQuery.
+[1.3.16] Created the CustomGetAllQuery because I can't seem to get the Massive one to work like I want.
 [1.3.15] Fixed a bug when trying to use the GetAll strategy.
 [1.3.14] Added a new GetAll strategy that will not throw when trying to retrieve bad values from a DataReader.
 [1.3.13] Added the ability to supply delimited identifiers if you don't want to use Sql Server's square brackets.
