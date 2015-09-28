@@ -7,6 +7,7 @@ using CacheRepository.Configuration.Configs;
 using CacheRepository.ConnectionResolvers;
 using CacheRepository.DisposeStrategies;
 using CacheRepository.EntityRetrieverStrategies;
+using CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies;
 using CacheRepository.ExecuteSqlStrategies;
 using CacheRepository.Indexes;
 using CacheRepository.InsertStrategies;
@@ -26,6 +27,7 @@ namespace CacheRepository.Configuration.Builders
 		private IBulkInsertStrategy bulkInsertStrategy;
 		private ICommitStrategy commitStrategy;
 		private readonly List<Tuple<Type, string>> customEntitySql;
+        private readonly Dictionary<Type, IGetAllQuery> overriddenDefaultGetAllQueryStrategy;
 		private IEntityRetrieverStrategy entityRetrieverStrategy;
 		private IExecuteSqlStrategy executeSqlStrategy;
 		private IInsertStrategy insertStrategy;
@@ -42,6 +44,7 @@ namespace CacheRepository.Configuration.Builders
 			this.connection = connection;
 			this.indexes = new List<IIndex>();
 			this.customEntitySql = new List<Tuple<Type, string>>();
+            this.overriddenDefaultGetAllQueryStrategy = new Dictionary<Type, IGetAllQuery>();
 			this.nextIdStrategy = new SmartNextIdRetreiver();
 			this.setIdStrategy = new SmartEntityIdSetter();
 	        this.sqlQualifiers = new SqlServerQualifiers();
@@ -52,7 +55,7 @@ namespace CacheRepository.Configuration.Builders
 			this.connectionResolver = this.connectionResolver ?? new SqlConnectionResolver(this.connection);
 			this.bulkInsertStrategy = this.bulkInsertStrategy ?? new SqlServerBulkInsert(connectionResolver);
 			this.commitStrategy = this.commitStrategy ?? new CommitSqlConnection(connectionResolver);
-			this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver, this.sqlQualifiers);
+            this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver, this.sqlQualifiers, this.overriddenDefaultGetAllQueryStrategy);
 			this.executeSqlStrategy = this.executeSqlStrategy ?? new ExecuteSqlWithDapper(connectionResolver);
 			this.insertStrategy = this.insertStrategy ?? new SqlInsertWithDapper(connectionResolver);
 			this.updateStrategy = this.updateStrategy ?? new SqlUpdateWithDapper(connectionResolver);
@@ -114,6 +117,12 @@ namespace CacheRepository.Configuration.Builders
         public SqlRepositoryConfigBuilder WithSqlQualifiers(ISqlQualifiers newValue)
         {
             this.sqlQualifiers = newValue;
+            return this;
+        }
+
+        public SqlRepositoryConfigBuilder OverrideDefaultGetAllQueryStrategy<TEntity>(IGetAllQuery getAllQuery) where TEntity : class
+        {
+            this.overriddenDefaultGetAllQueryStrategy.Add(typeof(TEntity), getAllQuery);
             return this;
         }
 	}
