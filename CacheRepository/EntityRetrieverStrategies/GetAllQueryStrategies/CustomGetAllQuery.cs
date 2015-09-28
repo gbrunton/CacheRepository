@@ -52,10 +52,10 @@ namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
                                 value = reader.GetValue(x.Item1);
                             } catch {}
 
-                            if (value != null)
-                            {
-                                x.Item2.SetValue(entity, Convert.ChangeType(value, x.Item2.PropertyType), null);
-                            }
+                            if (value == null) return;
+
+                            var changeToType = Nullable.GetUnderlyingType(x.Item2.PropertyType) ?? x.Item2.PropertyType;
+                            x.Item2.SetValue(entity, Convert.ChangeType(value, changeToType), null);
                         });
                     }
                 }
