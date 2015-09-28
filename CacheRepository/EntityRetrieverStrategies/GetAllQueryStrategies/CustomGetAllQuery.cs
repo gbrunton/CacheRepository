@@ -52,7 +52,7 @@ namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
                                 value = reader.GetValue(x.Item1);
                             } catch {}
 
-                            if (value == null) return;
+                            if (value == null || DBNull.Value == value) return;
 
                             var changeToType = Nullable.GetUnderlyingType(x.Item2.PropertyType) ?? x.Item2.PropertyType;
                             x.Item2.SetValue(entity, Convert.ChangeType(value, changeToType), null);
