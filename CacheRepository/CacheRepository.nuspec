@@ -14,23 +14,26 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.3.13] Added the ability to supply delimited identifiers if you don't want to use Sql Server's square brackets.
-[1.3.12] Fixed bug with trying to dispose a null transaction/connection.
-[1.3.11] Pushed the new GetAll method down to the implementations.
-[1.3.10] Added the ability to get all entities not using a generic.
-[1.3.9] Really fixed the problem with trimming when an empty field delimitor is used. 
-[1.3.8] Fixed an issue when the delimited file might not have all of the delimiters on a line. 
-[1.3.7] Fixed a problem with trimming when the value to trim is an empty string.
-[1.3.6] Changed the .net target framework from 4.5 to 4.0. This will allow older projects to depend on this library.
-[1.3.5] Fixed a bug within the Repository that would try and get a max id value when an insert is called even if the IdDoesNotExist strategy was declared. This was also causing an unnecessary select * query when ids are guids. 
-[1.3.4] Made the SqlWithPassThruConnectionAndTransactionConnectionResolver constructor public. Otherwise its' not useful.
-[1.3.3] Updated the nuspec
-[1.3.2] Created the SqlWithPassThruConnectionAndTransactionConnectionResolver as a way to use this library with an existing IDbConnection and IDbTransaction.
-[1.3.1] Updated FubuCore to 1.0.0.225 version.
-[1.3] Added the ability to insert lines into existing text files by either overwriting or appending.
-[1.2] Expanded the FileRepository's API to now allow you to insert lines into text files.
-[1.1] Made entity id configuration not necessary for most cases.
-[1.0] This is the initial release of the library.</releaseNotes>
+    <releaseNotes>
+      [1.3.15] Fixed a bug when trying to use the GetAll strategy.
+      [1.3.14] Added a new GetAll strategy that will not throw when trying to retrieve bad values from a DataReader.
+      [1.3.13] Added the ability to supply delimited identifiers if you don't want to use Sql Server's square brackets.
+      [1.3.12] Fixed bug with trying to dispose a null transaction/connection.
+      [1.3.11] Pushed the new GetAll method down to the implementations.
+      [1.3.10] Added the ability to get all entities not using a generic.
+      [1.3.9] Really fixed the problem with trimming when an empty field delimitor is used.
+      [1.3.8] Fixed an issue when the delimited file might not have all of the delimiters on a line.
+      [1.3.7] Fixed a problem with trimming when the value to trim is an empty string.
+      [1.3.6] Changed the .net target framework from 4.5 to 4.0. This will allow older projects to depend on this library.
+      [1.3.5] Fixed a bug within the Repository that would try and get a max id value when an insert is called even if the IdDoesNotExist strategy was declared. This was also causing an unnecessary select * query when ids are guids.
+      [1.3.4] Made the SqlWithPassThruConnectionAndTransactionConnectionResolver constructor public. Otherwise its' not useful.
+      [1.3.3] Updated the nuspec
+      [1.3.2] Created the SqlWithPassThruConnectionAndTransactionConnectionResolver as a way to use this library with an existing IDbConnection and IDbTransaction.
+      [1.3.1] Updated FubuCore to 1.0.0.225 version.
+      [1.3] Added the ability to insert lines into existing text files by either overwriting or appending.
+      [1.2] Expanded the FileRepository's API to now allow you to insert lines into text files.
+      [1.1] Made entity id configuration not necessary for most cases.
+      [1.0] This is the initial release of the library.</releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>.NET Repository Cache ORM SQL Flat File ETL</tags>
   </metadata>

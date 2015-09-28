@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -15,7 +16,7 @@ namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
                 Expression.New(typeof (TEntity).GetConstructor(Type.EmptyTypes))
                 ).Compile();
 
-            return new DynamicModel(connection).Query(queryString, connection).Select(x =>
+            return new DynamicModel(connection).Query(queryString, (DbConnection) connection).Select(x =>
             {
                 var entity = func();
                 return Mapper<TEntity>.Map(x, entity);
