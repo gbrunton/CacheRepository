@@ -8,7 +8,11 @@ using CacheRepository.Utils;
 
 namespace CacheRepository.EntityRetrieverStrategies.GetAllQueryStrategies
 {
-    public class CustomGetAllQuery : IGetAllQuery
+    /// <summary>
+    /// This strategy will set default values when reading from the DataReader throws. Only use this strategy if you need that feature as this 
+    /// is a lot slower than the default GetAllQueryUserDapper strategy is.
+    /// </summary>
+    public class GetAllQuerySettingDefaultValueOnError : IGetAllQuery
     {
         public IEnumerable<dynamic> Execute<TEntity>(IDbConnection connection, string queryString, IDbTransaction transaction) where TEntity : class
         {

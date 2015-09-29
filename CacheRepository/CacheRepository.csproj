@@ -77,7 +77,7 @@
     <Compile Include="DisposeStrategies\DisposeConnectionResolver.cs" />
     <Compile Include="DisposeStrategies\IDisposeStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\FileEntityRetrieverStrategy.cs" />
-    <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\CustomGetAllQuery.cs" />
+    <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\GetAllQuerySettingDefaultValueOnError.cs" />
     <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\GetAllQueryUsingDapper.cs" />
     <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\IGetAllQuery.cs" />

@@ -120,7 +120,7 @@ namespace CacheRepository.Configuration.Builders
             return this;
         }
 
-        public SqlRepositoryConfigBuilder OverrideDefaultGetAllQueryStrategy<TEntity>(IGetAllQuery getAllQuery) where TEntity : class
+        public SqlRepositoryConfigBuilder WithGetAllQueryStrategy<TEntity>(IGetAllQuery getAllQuery) where TEntity : class
         {
             this.overriddenDefaultGetAllQueryStrategy.Add(typeof(TEntity), getAllQuery);
             return this;
