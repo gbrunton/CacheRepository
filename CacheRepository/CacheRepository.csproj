@@ -78,10 +78,7 @@
     <Compile Include="DisposeStrategies\IDisposeStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\FileEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\CustomGetAllQuery.cs" />
-    <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\GetAllQueryUsingCustomMassive.cs" />
     <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\GetAllQueryUsingDapper.cs" />
-    <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\Mapper.cs" />
-    <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\Massive.cs" />
     <Compile Include="EntityRetrieverStrategies\IEntityRetrieverStrategy.cs" />
     <Compile Include="EntityRetrieverStrategies\GetAllQueryStrategies\IGetAllQuery.cs" />
     <Compile Include="EntityRetrieverStrategies\SqlEntityRetrieverStrategy.cs" />
