@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.3.19] Handling DBNull values.
+    <releaseNotes>[1.2.0] Renaming the CustomGetAllQuery.cs and updating the builder to try and be a little more consistent.
+[1.3.19] Handling DBNull values.
 [1.3.18] Allowing nullable types to be set from the CustomGetAllQuery.[1.3.17] Fixed a bug in the CustomGetAllQuery.
 [1.3.16] Created the CustomGetAllQuery because I can't seem to get the Massive one to work like I want.
 [1.3.15] Fixed a bug when trying to use the GetAll strategy.
