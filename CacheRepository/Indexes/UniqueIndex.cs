@@ -5,7 +5,7 @@ namespace CacheRepository.Indexes
 {
 	public abstract class UniqueIndex<TEntity, TKey> : Index<TEntity, TKey> where TEntity : class
 	{
-		private readonly Cache<TKey, TEntity> cache;
+		private Cache<TKey, TEntity> cache;
 
 		public UniqueIndex()
 		{
@@ -15,7 +15,13 @@ namespace CacheRepository.Indexes
 			};
 		}
 
-		public override void Add(object entityAsObject)
+        public override dynamic Cache
+        {
+            get { return cache; }
+            set { this.cache = value; }
+        }
+
+	    public override void Add(object entityAsObject)
 		{
 			var entity = (TEntity)entityAsObject;
 			var key = GetKey(entity);

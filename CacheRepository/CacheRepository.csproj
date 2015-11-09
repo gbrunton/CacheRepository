@@ -39,6 +39,10 @@
     <Reference Include="DapperExtensions">
       <HintPath>..\packages\DapperExtensions.1.4.0\lib\net40\DapperExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -110,6 +114,7 @@
     <Compile Include="QueryStrategies\QueryWithDapper.cs" />
     <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
+    <Compile Include="Repositories\RepositoryData.cs" />
     <Compile Include="Repositories\SqlRepository.cs" />
     <Compile Include="SetIdStrategy\SmartEntityIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />

@@ -51,6 +51,7 @@
     <Compile Include="Entities\Blog.cs" />
     <Compile Include="Entities\BlogWithAttribute.cs" />
     <Compile Include="Entities\BlogWithStringOnlyProperties.cs" />
+    <Compile Include="Indexes\BlogByAuthorIndex.cs" />
     <Compile Include="IntegrationTests\Repositories\FileRepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\InsertStrategies\FileInsertTestFixture.cs" />

@@ -7,12 +7,79 @@ using CacheRepository.OutputConventions;
 using CacheRepository.Utils;
 using NUnit.Framework;
 using Tests.Entities;
+using Tests.Indexes;
 
 namespace Tests.IntegrationTests.Repositories
 {
 	public class FileRepositoryTests
 	{
 		private const string TestFileExtension = ".test.txt";
+
+	    [TestFixture]
+	    public class When_persisting_data : FileRepositoryTests
+	    {
+	        [Test]
+	        public void TEST_NAME()
+	        {
+	            // Arrange
+                deleteTestFiles();
+
+                var config = new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistData(true)
+                    .WithIndexes(new BlogByAuthorIndex())
+                    .Build();
+                var blog = new Blog
+                {
+                    Title = "Future Time Saver Log",
+                    Author = "Gary Brunton",
+                    CreatedDate = DateTime.Now
+                };
+
+	            var blogWithStringOnlyProperties = new BlogWithStringOnlyProperties
+	            {
+	                Author = "Simon",
+	                CreatedDate = "1/1/2010",
+	                Id = 100,
+	                ModifiedDate = "2/1/2010",
+	                Title = "This is a test"
+	            };
+
+	            // Act
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                    repo.Insert(blogWithStringOnlyProperties);
+                }
+
+                IEnumerable<Blog> blogs;
+                IEnumerable<BlogWithStringOnlyProperties> blogsWithStringOnlyProperties;
+                using (var repo = config.BuildRepository())
+                {
+                    blogs = repo.GetAll<Blog>();
+                    blogsWithStringOnlyProperties = repo.GetAll<BlogWithStringOnlyProperties>();
+
+                }
+
+                // Assert
+                var fromFile = blogs.Single();
+                Assert.AreEqual(blog.Id, fromFile.Id);
+                Assert.AreEqual(blog.Title, fromFile.Title);
+                Assert.AreEqual(blog.Author, fromFile.Author);
+                Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), fromFile.CreatedDate.ToString("MM/dd/yyyy"));
+                Assert.AreEqual(blog.ModifiedDate, fromFile.ModifiedDate);
+
+                var fromFile2 = blogsWithStringOnlyProperties.Single();
+                Assert.AreEqual(blogWithStringOnlyProperties.Id, fromFile2.Id);
+                Assert.AreEqual(blogWithStringOnlyProperties.Title, fromFile2.Title);
+                Assert.AreEqual(blogWithStringOnlyProperties.Author, fromFile2.Author);
+                Assert.AreEqual(blogWithStringOnlyProperties.CreatedDate, fromFile2.CreatedDate);
+                Assert.AreEqual(blogWithStringOnlyProperties.ModifiedDate, fromFile2.ModifiedDate);
+
+            }     
+	    }
 
 		[TestFixture]
 		public class When_writing_and_reading_an_entity_to_file : FileRepositoryTests
@@ -204,6 +271,7 @@ namespace Tests.IntegrationTests.Repositories
 		{
 			Directory
 				.GetFiles(".", "*" + TestFileExtension)
+                .Union(Directory.GetFiles(".", "*.dat"))
 				.Each(File.Delete);
 		}
 	}

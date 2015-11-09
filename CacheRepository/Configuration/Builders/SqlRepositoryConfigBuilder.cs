@@ -37,6 +37,7 @@ namespace CacheRepository.Configuration.Builders
 		private IUpdateStrategy updateStrategy;
 		private ISqlConnectionResolver connectionResolver;
 	    private ISqlQualifiers sqlQualifiers;
+        private bool persistData;
 
 	    public SqlRepositoryConfigBuilder(IDbConnection connection)
 		{
@@ -74,8 +75,9 @@ namespace CacheRepository.Configuration.Builders
 					NextIdStrategy = this.nextIdStrategy,
 					QueryStrategy = this.queryStrategy,
 					SetIdStrategy = this.setIdStrategy,
-					UpdateStrategy = this.updateStrategy
-				};
+					UpdateStrategy = this.updateStrategy,
+                    PersistData = this.persistData
+                };
 		}
 
 		public SqlRepositoryConfigBuilder WithConnectionResolver(ISqlConnectionResolver newValue)
@@ -123,6 +125,12 @@ namespace CacheRepository.Configuration.Builders
         public SqlRepositoryConfigBuilder WithGetAllQueryStrategy<TEntity>(IGetAllQuery getAllQuery) where TEntity : class
         {
             this.overriddenDefaultGetAllQueryStrategy.Add(typeof(TEntity), getAllQuery);
+            return this;
+        }
+
+        public SqlRepositoryConfigBuilder WithPersistData(bool newValue)
+        {
+            this.persistData = newValue;
             return this;
         }
 	}

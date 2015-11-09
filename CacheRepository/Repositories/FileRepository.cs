@@ -33,7 +33,8 @@ namespace CacheRepository.Repositories
 					NextIdStrategy = repositoryConfig.NextIdStrategy,
 					SetIdStrategy = repositoryConfig.SetIdStrategy,
 					QueryStrategy = new DoNothingQuery(),
-					UpdateStrategy = new DoNothingUpdate()
+					UpdateStrategy = new DoNothingUpdate(),
+                    PersistData = repositoryConfig.PersistData
 				};
 			this.repository = new Repository(config);
 		}
