@@ -174,6 +174,20 @@ using (var repository = config.BuildRepository())
 }
 ```
 
+## Change the default GetAllQueryStrategy
+
+There are times when retrieving data from a data source throws because the data is not formatted properly. For example, I’ve had problems when querying an old db using an odbc driver and the driver throws when accessing a specific DateTime property that contains data that is corrupt. The default strategy will throw and the program will stop. You can use the ‘GetAllQuerySettingDefaultValueOnError’ strategy instead that will not throw but will set the value to the data type’s default value. Unfortunately this strategy is very slow compared to the default one.
+
+```c#
+var config = new SqlRepositoryConfigBuilder(connection)
+	.WithGetAllQueryStrategy<Blog>(new GetAllQuerySettingDefaultValueOnError())
+	.Build();
+using (var repository = config.BuildRepository())
+{
+	var blogs = repository.GetAll<Blog>();
+}
+```
+
 ## In Memory Indexes
 
 Performing Linq on in memory objects can be relatively fast but when you are dealing with several million entities and you want to filter by multiple properties the milliseconds start adding up to several minutes. This is when you should consider Indexes. CacheRepository supports both a UniqueIndex type which will only contain one entity or a NonUniqueIndex type which will contain a collection.
