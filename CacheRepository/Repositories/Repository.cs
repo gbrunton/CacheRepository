@@ -74,8 +74,7 @@ namespace CacheRepository.Repositories
 
 		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
-			insert(entities, entity =>
-							 this.repositoryConfig.InsertStrategy.Insert(entity));
+			insert(entities, entity => this.repositoryConfig.InsertStrategy.Insert(entity));
 		}
 
 		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class

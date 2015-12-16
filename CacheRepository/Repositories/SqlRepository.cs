@@ -28,7 +28,7 @@ namespace CacheRepository.Repositories
 					SetIdStrategy = repositoryConfig.SetIdStrategy,
 					QueryStrategy = repositoryConfig.QueryStrategy,
 					UpdateStrategy = repositoryConfig.UpdateStrategy,
-                    PersistData = repositoryConfig.PersistData
+                    PersistedDataPath = repositoryConfig.PersistedDataPath
                 };
 			this.repository = new Repository(config);			
 		}

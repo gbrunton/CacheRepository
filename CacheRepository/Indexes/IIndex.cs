@@ -7,6 +7,5 @@ namespace CacheRepository.Indexes
 		void Add(object entity);
 		Type GetEntityType();
 		bool HasBeenHydrated { get; set; }
-        dynamic Cache { get;  }
 	}
 }

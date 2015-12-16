@@ -37,7 +37,7 @@ namespace CacheRepository.Configuration.Builders
 		private IUpdateStrategy updateStrategy;
 		private ISqlConnectionResolver connectionResolver;
 	    private ISqlQualifiers sqlQualifiers;
-        private bool persistData;
+        private string persistedDataPath;
 
 	    public SqlRepositoryConfigBuilder(IDbConnection connection)
 		{
@@ -76,7 +76,7 @@ namespace CacheRepository.Configuration.Builders
 					QueryStrategy = this.queryStrategy,
 					SetIdStrategy = this.setIdStrategy,
 					UpdateStrategy = this.updateStrategy,
-                    PersistData = this.persistData
+                    PersistedDataPath = this.persistedDataPath
                 };
 		}
 
@@ -128,9 +128,9 @@ namespace CacheRepository.Configuration.Builders
             return this;
         }
 
-        public SqlRepositoryConfigBuilder WithPersistData(bool newValue)
+        public SqlRepositoryConfigBuilder WithPersistedDataPath(string newValue)
         {
-            this.persistData = newValue;
+            this.persistedDataPath = newValue;
             return this;
         }
 	}

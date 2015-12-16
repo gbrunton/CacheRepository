@@ -15,16 +15,6 @@ namespace CacheRepository.Indexes
 			};
 		}
 
-        public override dynamic Cache
-        {
-            get { return cache; }
-            set
-            {
-                this.cache = value;
-                this.cache.OnMissing = key => new List<TEntity>();
-            }
-        }
-
 		public override void Add(object entityAsObject)
 		{
 			var entity = (TEntity)entityAsObject;

@@ -20,7 +20,7 @@ namespace CacheRepository.Configuration.Configs
 		public INextIdStrategy NextIdStrategy { get; set; }
 		public ISetIdStrategy SetIdStrategy { get; set; }
 		public IInsertStrategy InsertStrategy { get; set; }
-	    public bool PersistData { get; set; }
+	    public string PersistedDataPath { get; set; }
 
 	    public FileRepository BuildRepository()
 		{

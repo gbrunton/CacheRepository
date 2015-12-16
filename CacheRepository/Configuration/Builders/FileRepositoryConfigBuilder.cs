@@ -28,7 +28,7 @@ namespace CacheRepository.Configuration.Builders
 		private string delimitor;
 		private string fieldQualifier;
 		private Cache<Type, EntityPropertiesForFile> entityPropertiesForFiles;
-	    private bool persistData;
+	    private string persistedDataPath;
 
 	    public FileRepositoryConfigBuilder(string rootPathFolder)
 		{
@@ -64,7 +64,7 @@ namespace CacheRepository.Configuration.Builders
 					InsertStrategy = this.insertStrategy,
 					NextIdStrategy = this.nextIdStrategy,
 					SetIdStrategy = this.setIdStrategy,
-                    PersistData = this.persistData
+                    PersistedDataPath = this.persistedDataPath
 				};
 		}
 
@@ -139,9 +139,9 @@ namespace CacheRepository.Configuration.Builders
 			return this;
 		}
 
-	    public FileRepositoryConfigBuilder WithPersistData(bool newValue)
+	    public FileRepositoryConfigBuilder WithPersistedDataPath(string newValue)
 	    {
-	        this.persistData = newValue;
+	        this.persistedDataPath = newValue;
 	        return this;
 	    }
 	}

@@ -19,16 +19,20 @@ namespace Tests.IntegrationTests.Repositories
 	    public class When_persisting_data : FileRepositoryTests
 	    {
 	        [Test]
-	        public void TEST_NAME()
+            public void the_data_can_be_persisted_and_retrieved()
 	        {
 	            // Arrange
                 deleteTestFiles();
+
+	            const string persistedDatapath = @".\PersistedData";
+                Directory.CreateDirectory(persistedDatapath);
+                Directory.GetFiles(persistedDatapath).Each(File.Delete);
 
                 var config = new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
-                    .WithPersistData(true)
+                    .WithPersistedDataPath(persistedDatapath)
                     .WithIndexes(new BlogByAuthorIndex())
                     .Build();
                 var blog = new Blog
@@ -54,13 +58,14 @@ namespace Tests.IntegrationTests.Repositories
                     repo.Insert(blogWithStringOnlyProperties);
                 }
 
+                deleteTestFiles();
+
                 IEnumerable<Blog> blogs;
                 IEnumerable<BlogWithStringOnlyProperties> blogsWithStringOnlyProperties;
                 using (var repo = config.BuildRepository())
                 {
                     blogs = repo.GetAll<Blog>();
                     blogsWithStringOnlyProperties = repo.GetAll<BlogWithStringOnlyProperties>();
-
                 }
 
                 // Assert
@@ -77,8 +82,65 @@ namespace Tests.IntegrationTests.Repositories
                 Assert.AreEqual(blogWithStringOnlyProperties.Author, fromFile2.Author);
                 Assert.AreEqual(blogWithStringOnlyProperties.CreatedDate, fromFile2.CreatedDate);
                 Assert.AreEqual(blogWithStringOnlyProperties.ModifiedDate, fromFile2.ModifiedDate);
+            }
 
-            }     
+	        [Test]
+            public void the_data_can_be_persisted_and_more_data_can_be_inserted_correctly()
+	        {
+                // Arrange
+                deleteTestFiles();
+
+                const string persistedDatapath = @".\PersistedData";
+                Directory.CreateDirectory(persistedDatapath);
+                Directory.GetFiles(persistedDatapath).Each(File.Delete);
+
+                var config = new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistedDataPath(persistedDatapath)
+                    .WithIndexes(new BlogByAuthorIndex())
+                    .Build();
+                var blog = new Blog
+                {
+                    Title = "Future Time Saver Log",
+                    Author = "Gary Brunton",
+                    CreatedDate = DateTime.Now
+                };
+
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                }
+
+                // Act
+	            config = new FileRepositoryConfigBuilder(".")
+	                .WithFileExtension(TestFileExtension)
+	                .WithFileDelimitor(",")
+	                .WithFieldQualifier("\"")
+	                .WithPersistedDataPath(persistedDatapath)
+	                .WithIndexes(new BlogByAuthorIndex())
+	                .Build();
+
+                IEnumerable<Blog> blogs;
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                    blogs = repo.GetAll<Blog>();
+                }
+
+                // Assert
+                Assert.AreEqual(2, blogs.Count());
+
+                deleteTestFiles();
+
+                using (var repo = config.BuildRepository())
+                {
+                    blogs = repo.GetAll<Blog>();
+                }
+
+                Assert.AreEqual(2, blogs.Count());
+            }
 	    }
 
 		[TestFixture]
