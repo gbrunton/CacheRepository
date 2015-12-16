@@ -28,5 +28,6 @@ namespace CacheRepository.Configuration.Configs
 		public IQueryStrategy QueryStrategy { get; set; }
 		public ICommitStrategy CommitStrategy { get; set; }
 		public IDisposeStrategy DisposeStrategy { get; set; }
+	    public string PersistedDataPath { get; set; }
 	}
 }

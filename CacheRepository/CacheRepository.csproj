@@ -39,6 +39,10 @@
     <Reference Include="DapperExtensions">
       <HintPath>..\packages\DapperExtensions.1.4.0\lib\net40\DapperExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Text, Version=4.0.50.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Text.4.0.50\lib\net40\ServiceStack.Text.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -110,6 +114,7 @@
     <Compile Include="QueryStrategies\QueryWithDapper.cs" />
     <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
+    <Compile Include="Repositories\RepositoryData.cs" />
     <Compile Include="Repositories\SqlRepository.cs" />
     <Compile Include="SetIdStrategy\SmartEntityIdSetter.cs" />
     <Compile Include="SetIdStrategy\EntityHasIdSetter.cs" />

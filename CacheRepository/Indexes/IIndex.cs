@@ -6,6 +6,6 @@ namespace CacheRepository.Indexes
 	{
 		void Add(object entity);
 		Type GetEntityType();
-		bool HasBeenHydrated { get; set; }		 
+		bool HasBeenHydrated { get; set; }
 	}
 }

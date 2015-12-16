@@ -5,7 +5,7 @@ namespace CacheRepository.Indexes
 {
 	public abstract class NonUniqueIndex<TEntity, TKey> : Index<TEntity, TKey>
 	{
-		private readonly Cache<TKey, List<TEntity>> cache;
+		private Cache<TKey, List<TEntity>> cache;
 
 		public NonUniqueIndex()
 		{

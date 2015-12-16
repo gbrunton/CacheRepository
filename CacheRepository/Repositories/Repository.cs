@@ -13,22 +13,20 @@ namespace CacheRepository.Repositories
 		: IDisposable, ICanInsert, ICanBuilkInsert, ICanSqlQuery, ICanExecuteSql, ICanUpdate, ICanCommit, ICanGet
 	{
 		private readonly IRepositoryConfig repositoryConfig;
-		private readonly Cache<Type, IIndex> indexesCached;
-		private readonly Cache<Type, List<dynamic>> entitiesCached;
 		private readonly Cache<Type, List<dynamic>> entitiesCachedForBulkInsert;
 		private readonly Cache<Type, dynamic> entityIds;
 		private readonly Cache<Type, string> entitySqlCached;
+	    private readonly RepositoryData repositoryData;
 
 		public Repository(IRepositoryConfig repositoryConfig)
 		{
 			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
 			this.repositoryConfig = repositoryConfig;
-			this.indexesCached = new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
-			this.entitiesCached = new Cache<Type, List<dynamic>>();
 			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
 			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(key, () => this.GetAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
 			this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
+		    this.repositoryData = new RepositoryData(repositoryConfig);
 		}
 
 		public void BuilkInsertNonGeneric(object entity)
@@ -76,15 +74,14 @@ namespace CacheRepository.Repositories
 
 		public void Insert<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
 		{
-			insert(entities, entity =>
-							 this.repositoryConfig.InsertStrategy.Insert(entity));
+			insert(entities, entity => this.repositoryConfig.InsertStrategy.Insert(entity));
 		}
 
 		private void insert<TEntity>(IEnumerable<TEntity> entities, Action<TEntity> insertFunction) where TEntity : class
 		{
 			var type = typeof(TEntity);
 			var existingEntities = this.getAllWithGeneric<TEntity>();
-			var typeIndexes = this.indexesCached.Where(x => type == x.GetEntityType());
+			var typeIndexes = this.repositoryData.IndexesCached.Value.Where(x => type == x.GetEntityType());
 			entities.Each(entity =>
 			{
 				var id = this.entityIds[type];
@@ -123,7 +120,7 @@ namespace CacheRepository.Repositories
 
 		public TIndex GetIndex<TIndex>() where TIndex : IIndex
 		{
-			var index = (TIndex)this.indexesCached[typeof(TIndex)];
+            var index = (TIndex)this.repositoryData.IndexesCached.Value[typeof(TIndex)];
 			if (!index.HasBeenHydrated)
 			{
 				GetAll(index.GetEntityType());
@@ -140,17 +137,18 @@ namespace CacheRepository.Repositories
 		public void Dispose()
 		{
 			this.repositoryConfig.DisposeStrategy.Dispose();
+		    this.repositoryData.Dispose();
 		}
 
 		private List<dynamic> getAllWithGeneric<TEntity>() where TEntity : class 
 		{
 			var type = typeof(TEntity);
-			this.entitiesCached.OnMissing = key =>
+            this.repositoryData.EntitiesCached.Value.OnMissing = key =>
 			{
 				var all = this.repositoryConfig
 					.EntityRetrieverStrategy
 					.GetAll<TEntity>(this.entitySqlCached[type]);
-				var typeIndexes = this.indexesCached.Where(x => type == x.GetEntityType());
+                var typeIndexes = this.repositoryData.IndexesCached.Value.Where(x => type == x.GetEntityType());
 				var returnList = new List<dynamic>();
 				all.Each(entity =>
 					{
@@ -159,7 +157,7 @@ namespace CacheRepository.Repositories
 					});
 				return returnList;
 			};
-			return this.entitiesCached[type];
+            return this.repositoryData.EntitiesCached.Value[type];
 		}
 
 		public List<dynamic> GetAll(Type type)

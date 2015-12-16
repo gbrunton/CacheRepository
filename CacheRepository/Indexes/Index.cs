@@ -13,6 +13,6 @@ namespace CacheRepository.Indexes
 
 		public bool HasBeenHydrated { get; set; }
 
-		protected abstract TKey GetKey(TEntity entity);
+	    protected abstract TKey GetKey(TEntity entity);
 	}
 }
