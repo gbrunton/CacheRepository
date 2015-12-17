@@ -19,7 +19,7 @@ namespace CacheRepository.Indexes
         public IDictionary<TKey, TEntity> Cache
         {
             get { return this.cache.ToDictionary(); }
-            set { this.cache = new Cache<TKey, TEntity>(value); }
+            set { this.cache = new Cache<TKey, TEntity>(value) {OnMissing = key => null}; }
         }
 
 	    public override void Add(object entityAsObject)
