@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.5.0] Added the ability to persist data locally after being retreived.
+    <releaseNotes>[1.5.1] Now persistin the indexes should be work.
+[1.5.0] Added the ability to persist data locally after being retreived.
 [1.4.0] Renaming the CustomGetAllQuery.cs and updating the builder to try and be a little more consistent.
 [1.3.19] Handling DBNull values.
 [1.3.18] Allowing nullable types to be set from the CustomGetAllQuery.[1.3.17] Fixed a bug in the CustomGetAllQuery.
