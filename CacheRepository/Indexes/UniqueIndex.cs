@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CacheRepository.Utils;
 
 namespace CacheRepository.Indexes
@@ -14,6 +15,12 @@ namespace CacheRepository.Indexes
 				OnMissing = key => null
 			};
 		}
+
+        public IDictionary<TKey, TEntity> Cache
+        {
+            get { return this.cache.ToDictionary(); }
+            set { this.cache = new Cache<TKey, TEntity>(value); }
+        }
 
 	    public override void Add(object entityAsObject)
 		{

@@ -33,7 +33,7 @@ namespace Tests.IntegrationTests.Repositories
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
                     .WithPersistedDataPath(persistedDatapath)
-                    .WithIndexes(new BlogByAuthorIndex())
+                    .WithIndexes(new BlogsByAuthorIndex())
                     .Build();
                 var blog = new Blog
                 {
@@ -84,7 +84,101 @@ namespace Tests.IntegrationTests.Repositories
                 Assert.AreEqual(blogWithStringOnlyProperties.ModifiedDate, fromFile2.ModifiedDate);
             }
 
-	        [Test]
+            [Test]
+            public void the_data_can_be_persisted_and_a_NonUniqueIndex_can_be_retrieved()
+            {
+                // Arrange
+                deleteTestFiles();
+
+                const string persistedDatapath = @".\PersistedData";
+                Directory.CreateDirectory(persistedDatapath);
+                Directory.GetFiles(persistedDatapath).Each(File.Delete);
+
+                var config = new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistedDataPath(persistedDatapath)
+                    .WithIndexes(new BlogsByAuthorIndex())
+                    .Build();
+                var blog = new Blog
+                {
+                    Title = "Future Time Saver Log",
+                    Author = "Gary Brunton",
+                    CreatedDate = DateTime.Now
+                };
+
+                // Act
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                }
+
+                deleteTestFiles();
+
+                IEnumerable<Blog> blogs;
+                using (var repo = config.BuildRepository())
+                {
+                    blogs = repo.GetIndex<BlogsByAuthorIndex>().Get(blog.Author);
+                }
+
+                // Assert
+                var fromIndex = blogs.Single();
+                Assert.AreEqual(blog.Id, fromIndex.Id);
+                Assert.AreEqual(blog.Title, fromIndex.Title);
+                Assert.AreEqual(blog.Author, fromIndex.Author);
+                Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), fromIndex.CreatedDate.ToString("MM/dd/yyyy"));
+                Assert.AreEqual(blog.ModifiedDate, fromIndex.ModifiedDate);
+            }
+
+            [Test]
+            public void the_data_can_be_persisted_and_a_UniqueIndex_can_be_retrieved()
+            {
+                // Arrange
+                deleteTestFiles();
+
+                const string persistedDatapath = @".\PersistedData";
+                Directory.CreateDirectory(persistedDatapath);
+                Directory.GetFiles(persistedDatapath).Each(File.Delete);
+
+                var config = new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistedDataPath(persistedDatapath)
+                    .WithIndexes(new BlogByIdIndex())
+                    .Build();
+                var blog = new Blog
+                {
+                    Title = "Future Time Saver Log",
+                    Author = "Gary Brunton",
+                    CreatedDate = DateTime.Now
+                };
+
+                // Act
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                    var i  = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
+                }
+
+                deleteTestFiles();
+
+                Blog blogFromIndex;
+                using (var repo = config.BuildRepository())
+                {
+                    blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
+                }
+
+                // Assert
+                Assert.AreEqual(blog.Id, blogFromIndex.Id);
+                Assert.AreEqual(blog.Title, blogFromIndex.Title);
+                Assert.AreEqual(blog.Author, blogFromIndex.Author);
+                Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), blogFromIndex.CreatedDate.ToString("MM/dd/yyyy"));
+                Assert.AreEqual(blog.ModifiedDate, blogFromIndex.ModifiedDate);
+            }
+            
+            [Test]
             public void the_data_can_be_persisted_and_more_data_can_be_inserted_correctly()
 	        {
                 // Arrange
@@ -99,7 +193,7 @@ namespace Tests.IntegrationTests.Repositories
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
                     .WithPersistedDataPath(persistedDatapath)
-                    .WithIndexes(new BlogByAuthorIndex())
+                    .WithIndexes(new BlogsByAuthorIndex())
                     .Build();
                 var blog = new Blog
                 {
@@ -119,7 +213,7 @@ namespace Tests.IntegrationTests.Repositories
 	                .WithFileDelimitor(",")
 	                .WithFieldQualifier("\"")
 	                .WithPersistedDataPath(persistedDatapath)
-	                .WithIndexes(new BlogByAuthorIndex())
+	                .WithIndexes(new BlogsByAuthorIndex())
 	                .Build();
 
                 IEnumerable<Blog> blogs;

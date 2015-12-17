@@ -3,7 +3,7 @@ using Tests.Entities;
 
 namespace Tests.Indexes
 {
-    public class BlogByAuthorIndex : NonUniqueIndex<Blog, string>
+    public class BlogsByAuthorIndex : NonUniqueIndex<Blog, string>
     {
         protected override string GetKey(Blog entity)
         {

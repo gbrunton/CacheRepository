@@ -15,6 +15,12 @@ namespace CacheRepository.Indexes
 			};
 		}
 
+	    public IDictionary<TKey, List<TEntity>> Cache
+	    {
+	        get { return this.cache.ToDictionary(); }
+	        set { this.cache = new Cache<TKey, List<TEntity>>(value); }
+	    }
+
 		public override void Add(object entityAsObject)
 		{
 			var entity = (TEntity)entityAsObject;
