@@ -32,6 +32,8 @@ See the following for more details
 
 * Optional and configurable entity Id property usage
 
+* Load data from remote data source and persist it locally to avoid having to query the remote data source in future runs.
+
 ## Installation
 
 https://nuget.org/packages/CacheRepository
@@ -273,6 +275,24 @@ For example, the [DateTimeToyyyyMMdd](https://github.com/gbrunton/CacheRepositor
 You can create your own [IStringFormatterAttribute](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/StringFormatterAttributes/IStringFormatterAttribute.cs) implementations and apply them directly to properties for explicit formatting.
 
 For example, the [LengthAttribute](https://github.com/gbrunton/CacheRepository/blob/master/CacheRepository/StringFormatterAttributes/LengthAttribute.cs) attribute allows you to set a field's length and justification.
+
+## Persist Data Locally
+
+Setting the WithPersistedDataPath value of the ConfigBuilder will persist the data locally in the given path. 
+
+```c#
+var config = new SqlRepositoryConfigBuilder(connection)
+	.WithPersistedDataPath("c:\temp")
+	.Build();
+using (var repository = config.BuildRepository())
+{
+	var blogs = repository.GetAll<Blog>();
+}
+```
+
+I've used this when retrieving data from the original source takes a long time, like ODBC access to slow server. 
+
+Both entities and indexes are persisted so when a call is executed against the repository, it will first look in the given persisted path to see if any data already exists. If not it will query the external data source and ultimately persist it locally. On subsequent program executions, instead of loading from the external data source the data will be retrieved from the local persistent store.
 
 ## Still To Come
 
