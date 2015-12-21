@@ -21,22 +21,36 @@ namespace CacheRepository.Repositories
             {
                 this.IndexesCached = new Lazy<Cache<Type, IIndex>>(() =>
                 {
-                    var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "indexFile.dat");
-                    if (!File.Exists(path)) return new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
-                    using (var indexFileStream = File.OpenText(path))
-                    {
-                        return new Cache<Type, IIndex>(TypeSerializer.DeserializeFromReader<Dictionary<Type, IIndex>>(indexFileStream));
-                    }
+                    var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "Indexes");
+                    if (!Directory.Exists(path)) return new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
+                    var cache = new Cache<Type, IIndex>();
+                    Directory.EnumerateFiles(path)
+                        .Each(fileName =>
+                        {
+                            using (var entityFileStream = File.OpenRead(fileName))
+                            {
+                                var indexContainer = JsonSerializer.DeserializeFromStream<IndexContainer>(entityFileStream);
+                                cache.Fill(indexContainer.Type, indexContainer.Index);
+                            }
+                        });
+                    return cache;
                 });
 
                 this.EntitiesCached = new Lazy<Cache<Type, List<dynamic>>>(() =>
                 {
-                    var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "entityFile.dat");
-                    if (!File.Exists(path)) return new Cache<Type, List<dynamic>>();
-                    using (var entityFileStream = File.OpenText(path))
-                    {
-                        return new Cache<Type, List<dynamic>>(TypeSerializer.DeserializeFromReader<Dictionary<Type, List<dynamic>>>(entityFileStream));
-                    }
+                    var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "Entities");
+                    if (!Directory.Exists(path)) return new Cache<Type, List<dynamic>>();
+                    var cache = new Cache<Type, List<dynamic>>();
+                    Directory.EnumerateFiles(path)
+                        .Each(fileName =>
+                        {
+                            using (var entityFileStream = File.OpenRead(fileName))
+                            {
+                                var entityContainer = JsonSerializer.DeserializeFromStream<EntityContainer>(entityFileStream);
+                                cache.Fill(entityContainer.Type, entityContainer.Entities);
+                            }
+                        });
+                    return cache;
                 });
             }
             else
@@ -53,21 +67,49 @@ namespace CacheRepository.Repositories
         {
             if (string.IsNullOrWhiteSpace(this.repositoryConfig.PersistedDataPath)) return;
 
-            if (this.IndexesCached.Value.Any())
+            var pathToIndexes = Path.Combine(this.repositoryConfig.PersistedDataPath, "Indexes");
+            Directory.CreateDirectory(pathToIndexes);
+
+            foreach (var item in this.IndexesCached.Value.ToDictionary())
             {
-                using (var indexFileStream = File.CreateText(Path.Combine(this.repositoryConfig.PersistedDataPath, "indexFile.dat")))
+                using (var fileStream = File.Create(Path.Combine(pathToIndexes, string.Format("{0}.dat", item.Key))))
                 {
-                    TypeSerializer.SerializeToWriter(this.IndexesCached.Value.ToDictionary(), indexFileStream);
+                    JsonSerializer.SerializeToStream(
+                        new IndexContainer
+                        {
+                            Type = item.Key,
+                            Index = item.Value
+                        }, fileStream);
                 }                
+
             }
 
-            if (this.EntitiesCached.Value.Any())
+            var pathToEntities = Path.Combine(this.repositoryConfig.PersistedDataPath, "Entities");
+            Directory.CreateDirectory(pathToEntities);
+            foreach (var item in this.EntitiesCached.Value.ToDictionary())
             {
-                using (var entityFileStream = File.CreateText(Path.Combine(this.repositoryConfig.PersistedDataPath, "entityFile.dat")))
+                using (var fileStream = File.Create(Path.Combine(pathToEntities, string.Format("{0}.dat", item.Key))))
                 {
-                    TypeSerializer.SerializeToWriter(this.EntitiesCached.Value.ToDictionary(x => x[0].GetType()), entityFileStream);
+                    JsonSerializer.SerializeToStream(
+                        new EntityContainer
+                        {
+                            Type = item.Key,
+                            Entities = item.Value
+                        }, fileStream);
                 }                
             }
         }
+    }
+
+    public class IndexContainer
+    {
+        public Type Type { get; set; }
+        public IIndex Index { get; set; }
+    }
+
+    public class EntityContainer
+    {
+        public List<dynamic> Entities { get; set; }
+        public Type Type { get; set; }
     }
 }

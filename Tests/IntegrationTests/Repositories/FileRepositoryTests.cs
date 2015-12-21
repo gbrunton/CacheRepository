@@ -14,25 +14,29 @@ namespace Tests.IntegrationTests.Repositories
 	public class FileRepositoryTests
 	{
 		private const string TestFileExtension = ".test.txt";
+        private const string PersistedDatapath = @".\PersistedData";
 
 	    [TestFixture]
 	    public class When_persisting_data : FileRepositoryTests
 	    {
+	        [SetUp]
+	        public void SetUp()
+	        {
+                Directory.CreateDirectory(PersistedDatapath);
+                deletePersistedData();
+	        }
+
 	        [Test]
             public void the_data_can_be_persisted_and_retrieved()
 	        {
 	            // Arrange
                 deleteTestFiles();
 
-	            const string persistedDatapath = @".\PersistedData";
-                Directory.CreateDirectory(persistedDatapath);
-                Directory.GetFiles(persistedDatapath).Each(File.Delete);
-
                 var config = new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
-                    .WithPersistedDataPath(persistedDatapath)
+                    .WithPersistedDataPath(PersistedDatapath)
                     .WithIndexes(new BlogsByAuthorIndex())
                     .Build();
                 var blog = new Blog
@@ -84,21 +88,17 @@ namespace Tests.IntegrationTests.Repositories
                 Assert.AreEqual(blogWithStringOnlyProperties.ModifiedDate, fromFile2.ModifiedDate);
             }
 
-            [Test]
+	        [Test]
             public void the_data_can_be_persisted_and_a_NonUniqueIndex_can_be_retrieved()
             {
                 // Arrange
                 deleteTestFiles();
 
-                const string persistedDatapath = @".\PersistedData";
-                Directory.CreateDirectory(persistedDatapath);
-                Directory.GetFiles(persistedDatapath).Each(File.Delete);
-
                 var config = new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
-                    .WithPersistedDataPath(persistedDatapath)
+                    .WithPersistedDataPath(PersistedDatapath)
                     .WithIndexes(new BlogsByAuthorIndex())
                     .Build();
                 var blog = new Blog
@@ -137,15 +137,11 @@ namespace Tests.IntegrationTests.Repositories
                 // Arrange
                 deleteTestFiles();
 
-                const string persistedDatapath = @".\PersistedData";
-                Directory.CreateDirectory(persistedDatapath);
-                Directory.GetFiles(persistedDatapath).Each(File.Delete);
-
                 var config = new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
-                    .WithPersistedDataPath(persistedDatapath)
+                    .WithPersistedDataPath(PersistedDatapath)
                     .WithIndexes(new BlogByIdIndex())
                     .Build();
                 var blog = new Blog
@@ -159,7 +155,6 @@ namespace Tests.IntegrationTests.Repositories
                 using (var repo = config.BuildRepository())
                 {
                     repo.Insert(blog);
-                    var i  = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
                 }
 
                 deleteTestFiles();
@@ -184,15 +179,11 @@ namespace Tests.IntegrationTests.Repositories
                 // Arrange
                 deleteTestFiles();
 
-                const string persistedDatapath = @".\PersistedData";
-                Directory.CreateDirectory(persistedDatapath);
-                Directory.GetFiles(persistedDatapath).Each(File.Delete);
-
                 var config = new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
-                    .WithPersistedDataPath(persistedDatapath)
+                    .WithPersistedDataPath(PersistedDatapath)
                     .WithIndexes(new BlogsByAuthorIndex())
                     .Build();
                 var blog = new Blog
@@ -212,7 +203,7 @@ namespace Tests.IntegrationTests.Repositories
 	                .WithFileExtension(TestFileExtension)
 	                .WithFileDelimitor(",")
 	                .WithFieldQualifier("\"")
-	                .WithPersistedDataPath(persistedDatapath)
+                    .WithPersistedDataPath(PersistedDatapath)
 	                .WithIndexes(new BlogsByAuthorIndex())
 	                .Build();
 
@@ -234,6 +225,51 @@ namespace Tests.IntegrationTests.Repositories
                 }
 
                 Assert.AreEqual(2, blogs.Count());
+            }
+
+            [Test]
+            public void empty_strings_can_be_persisted_and_retrieved_as_empty_strings()
+            {
+                // Arrange
+                deleteTestFiles();
+
+                var config = new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistedDataPath(PersistedDatapath)
+                    .WithIndexes(new BlogsByAuthorIndex())
+                    .Build();
+                var blog = new Blog
+                {
+                    Title = null,
+                    Author = "",
+                    CreatedDate = DateTime.Now
+                };
+
+                using (var repo = config.BuildRepository())
+                {
+                    repo.Insert(blog);
+                }
+
+                deleteTestFiles();
+
+                // Act
+                Blog blogFromPersistantStore;
+                using (var repo = config.BuildRepository())
+                {
+                    blogFromPersistantStore = repo.GetAll<Blog>().Single();
+                }
+
+                // Assert
+                Assert.AreEqual(blog.Id, blogFromPersistantStore.Id);
+                Assert.AreEqual(blog.Title, blogFromPersistantStore.Title);
+                Assert.AreEqual(blog.Author, blogFromPersistantStore.Author);
+                Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), blogFromPersistantStore.CreatedDate.ToString("MM/dd/yyyy"));
+                Assert.AreEqual(blog.ModifiedDate, blogFromPersistantStore.ModifiedDate);
+
+                Assert.IsTrue(blogFromPersistantStore.Title == null);
+                Assert.IsTrue(blogFromPersistantStore.Author == "");
             }
 	    }
 
@@ -430,5 +466,11 @@ namespace Tests.IntegrationTests.Repositories
                 .Union(Directory.GetFiles(".", "*.dat"))
 				.Each(File.Delete);
 		}
+
+        private static void deletePersistedData()
+        {
+            Directory.GetFiles(PersistedDatapath).Each(File.Delete);
+            Directory.GetDirectories(PersistedDatapath).Each(x => Directory.Delete(x, true));
+        }
 	}
 }
