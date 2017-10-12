@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.5.4] No longer deserializing empty strings to null values.
+    <releaseNotes>[1.5.5] Indexes with complex keys should now deserialize correctly.
+[1.5.4] No longer deserializing empty strings to null values.
 [1.5.3] Dropped down to ServiceStack V3 which does not have quotas.
 [1.5.2] Initialized the indexes properly when persisted.
 [1.5.1] Now persistin the indexes should be work.
