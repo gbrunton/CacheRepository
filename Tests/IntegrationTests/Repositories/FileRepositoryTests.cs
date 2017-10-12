@@ -271,9 +271,52 @@ namespace Tests.IntegrationTests.Repositories
                 Assert.IsTrue(blogFromPersistantStore.Title == null);
                 Assert.IsTrue(blogFromPersistantStore.Author == "");
             }
-	    }
 
-		[TestFixture]
+	        [Test]
+	        public void the_data_can_be_persisted_and_a_NonUniqueIndex_complex_index_can_be_retrieved()
+	        {
+                // Arrange
+                deleteTestFiles();
+
+	            var config = new FileRepositoryConfigBuilder(".")
+	                .WithFileExtension(TestFileExtension)
+	                .WithFileDelimitor(",")
+	                .WithFieldQualifier("\"")
+	                .WithPersistedDataPath(PersistedDatapath)
+	                .WithIndexes(new BlogsByIdAndAuthorIndex())
+	                .Build();
+	            var blog = new Blog
+	            {
+	                Title = "Future Time Saver Log",
+	                Author = "Gary Brunton",
+	                CreatedDate = DateTime.Now
+	            };
+
+	            // Act
+	            using (var repo = config.BuildRepository())
+	            {
+	                repo.Insert(blog);
+	            }
+
+	            deleteTestFiles();
+
+	            IEnumerable<Blog> blogs;
+	            using (var repo = config.BuildRepository())
+	            {
+	                blogs = repo.GetIndex<BlogsByIdAndAuthorIndex>().Get(new IndexKey(blog.Id, blog.Author));
+	            }
+
+	            // Assert
+	            var fromIndex = blogs.Single();
+	            Assert.AreEqual(blog.Id, fromIndex.Id);
+	            Assert.AreEqual(blog.Title, fromIndex.Title);
+	            Assert.AreEqual(blog.Author, fromIndex.Author);
+	            Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), fromIndex.CreatedDate.ToString("MM/dd/yyyy"));
+	            Assert.AreEqual(blog.ModifiedDate, fromIndex.ModifiedDate);
+	        }
+        }
+
+        [TestFixture]
 		public class When_writing_and_reading_an_entity_to_file : FileRepositoryTests
 		{
 			[Test]
