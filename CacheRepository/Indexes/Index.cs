@@ -22,15 +22,14 @@ namespace CacheRepository.Indexes
 	    {
 	        get
 	        {
-	            return typeof(TKey).IsSimple() 
-                    ? this.Cache.ToDictionary().ToDictionary(entry => entry.Key.ToString(), entry => entry.Value) 
-                    : this.Cache.ToDictionary().ToDictionary(entry => JsonSerializer.SerializeToString(entry.Key), entry => entry.Value);
-	        }
+                return this.Cache.ToDictionary().ToDictionary(entry => JsonSerializer.SerializeToString(entry.Key), entry => entry.Value);
+            }
 	        set
 	        {
-	            this.Cache = new Cache<TKey, List<TEntity>>(
-	                value.ToDictionary(entry => JsonSerializer.DeserializeFromString<TKey>(entry.Key),
-	                    entry => entry.Value));
+	            this.Cache = new Cache<TKey, List<TEntity>>(value.ToDictionary(entry => JsonSerializer.DeserializeFromString<TKey>(entry.Key), entry => entry.Value))
+	            {
+	                OnMissing = key => new List<TEntity>()
+	            };
 	        }
 	    }
 
