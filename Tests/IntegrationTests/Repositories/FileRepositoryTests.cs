@@ -172,7 +172,56 @@ namespace Tests.IntegrationTests.Repositories
                 Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), blogFromIndex.CreatedDate.ToString("MM/dd/yyyy"));
                 Assert.AreEqual(blog.ModifiedDate, blogFromIndex.ModifiedDate);
             }
-            
+
+	        [Test]
+	        public void the_data_can_be_persisted_and_a_UniqueIndex_can_be_retrieved_even_if_there_are_multiple_keys_for_the_unique_index()
+	        {
+	            // Arrange
+	            deleteTestFiles();
+
+	            var config = new FileRepositoryConfigBuilder(".")
+	                .WithFileExtension(TestFileExtension)
+	                .WithFileDelimitor(",")
+	                .WithFieldQualifier("\"")
+	                .WithPersistedDataPath(PersistedDatapath)
+	                .WithIndexes(new BlogByIdTitle())
+	                .Build();
+	            var blog1 = new Blog
+	            {
+	                Title = "Future Time Saver Log",
+	                Author = "Gary Brunton 2",
+	                CreatedDate = DateTime.Now.AddDays(-1)
+	            };
+	            var blog2 = new Blog
+	            {
+	                Title = "Future Time Saver Log",
+	                Author = "Gary Brunton 2",
+	                CreatedDate = DateTime.Now
+	            };
+
+                // Act
+                using (var repo = config.BuildRepository())
+	            {
+	                repo.Insert(blog1);
+	                repo.Insert(blog2);
+	            }
+
+                deleteTestFiles();
+
+	            Blog blogFromIndex;
+	            using (var repo = config.BuildRepository())
+	            {
+	                blogFromIndex = repo.GetIndex<BlogByIdTitle>().Get(blog1.Title);
+	            }
+
+	            // Assert
+	            Assert.AreEqual(blog1.Id, blogFromIndex.Id);
+	            Assert.AreEqual(blog1.Title, blogFromIndex.Title);
+	            Assert.AreEqual(blog1.Author, blogFromIndex.Author);
+	            Assert.AreEqual(blog1.CreatedDate.ToString("MM/dd/yyyy"), blogFromIndex.CreatedDate.ToString("MM/dd/yyyy"));
+	            Assert.AreEqual(blog1.ModifiedDate, blogFromIndex.ModifiedDate);
+	        }
+
             [Test]
             public void the_data_can_be_persisted_and_more_data_can_be_inserted_correctly()
 	        {

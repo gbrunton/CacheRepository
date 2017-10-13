@@ -53,6 +53,7 @@
     <Compile Include="Entities\Blog.cs" />
     <Compile Include="Entities\BlogWithAttribute.cs" />
     <Compile Include="Entities\BlogWithStringOnlyProperties.cs" />
+    <Compile Include="Indexes\BlogByIdTitle.cs" />
     <Compile Include="Indexes\BlogByIdIndex.cs" />
     <Compile Include="Indexes\BlogsByAuthorIndex.cs" />
     <Compile Include="Indexes\BlogsByIdAndAuthorIndex.cs" />
