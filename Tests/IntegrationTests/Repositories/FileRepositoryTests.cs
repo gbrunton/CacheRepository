@@ -174,6 +174,44 @@ namespace Tests.IntegrationTests.Repositories
             }
 
 	        [Test]
+	        public void the_data_can_be_persisted_and_a_UniqueIndex_result_can_be_null()
+	        {
+	            // Arrange
+	            deleteTestFiles();
+
+	            var config = new FileRepositoryConfigBuilder(".")
+	                .WithFileExtension(TestFileExtension)
+	                .WithFileDelimitor(",")
+	                .WithFieldQualifier("\"")
+	                .WithPersistedDataPath(PersistedDatapath)
+	                .WithIndexes(new BlogByIdIndex())
+	                .Build();
+	            var blog = new Blog
+	            {
+	                Title = "Future Time Saver Log",
+	                Author = "Gary Brunton",
+	                CreatedDate = DateTime.Now
+	            };
+
+	            // Act
+	            using (var repo = config.BuildRepository())
+	            {
+	                repo.Insert(blog);
+	            }
+
+	            deleteTestFiles();
+
+	            Blog blogFromIndex;
+	            using (var repo = config.BuildRepository())
+	            {
+	                blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id + 1);
+	            }
+
+	            // Assert
+	            Assert.IsNull(blogFromIndex);
+	        }
+
+            [Test]
 	        public void the_data_can_be_persisted_and_a_UniqueIndex_can_be_retrieved_even_if_there_are_multiple_keys_for_the_unique_index()
 	        {
 	            // Arrange

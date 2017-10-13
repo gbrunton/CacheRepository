@@ -31,7 +31,7 @@ namespace CacheRepository.Indexes
 
 		public TEntity Get(TKey key)
 		{
-			return this.Cache[key].Single();
+		    return this.Cache[key].SingleOrDefault();
 		}
 	}
 }

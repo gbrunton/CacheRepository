@@ -27,10 +27,10 @@ namespace CacheRepository.Indexes
 	        set
 	        {
 	            this.Cache = new Cache<TKey, List<TEntity>>(value.ToDictionary(entry => JsonSerializer.DeserializeFromString<TKey>(entry.Key), entry => entry.Value))
-	            {
-	                OnMissing = key => new List<TEntity>()
-	            };
-	        }
+                {
+                    OnMissing = key => new List<TEntity>()
+                };
+            }
 	    }
 
         public abstract void Add(object entity);
