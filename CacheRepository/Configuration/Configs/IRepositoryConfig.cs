@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using CacheRepository.BulkInsertStrategies;
 using CacheRepository.CommitStrategies;
+using CacheRepository.Configuration.Builders;
 using CacheRepository.DisposeStrategies;
 using CacheRepository.EntityRetrieverStrategies;
 using CacheRepository.ExecuteSqlStrategies;
@@ -29,5 +30,7 @@ namespace CacheRepository.Configuration.Configs
 		ICommitStrategy CommitStrategy { get; }
 		IDisposeStrategy DisposeStrategy { get; }
 	    string PersistedDataPath { get; }
-	}
+	    PersistedDataAccess PersistedDataAccess { get; }
+
+    }
 }

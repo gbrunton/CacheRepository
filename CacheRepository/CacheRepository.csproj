@@ -67,6 +67,7 @@
     <Compile Include="CommitStrategies\DoNothingCommit.cs" />
     <Compile Include="CommitStrategies\ICommitStrategy.cs" />
     <Compile Include="Configuration\Builders\FileRepositoryConfigBuilder.cs" />
+    <Compile Include="Configuration\Builders\PersistedDataAccess.cs" />
     <Compile Include="Configuration\Builders\SqlRepositoryConfigBuilder.cs" />
     <Compile Include="Configuration\Configs\FileRepositoryConfig.cs" />
     <Compile Include="Configuration\Configs\IRepositoryConfig.cs" />

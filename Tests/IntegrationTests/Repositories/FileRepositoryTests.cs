@@ -89,6 +89,66 @@ namespace Tests.IntegrationTests.Repositories
             }
 
 	        [Test]
+	        public void the_data_can_be_persisted_and_an_Index_and_Entity_change_will_not_be_persisted_back_to_file()
+	        {
+	            // Arrange
+	            deleteTestFiles();
+
+	            var config = new FileRepositoryConfigBuilder(".")
+	                .WithFileExtension(TestFileExtension)
+	                .WithFileDelimitor(",")
+	                .WithFieldQualifier("\"")
+	                .WithPersistedDataPath(PersistedDatapath, PersistedDataAccess.ReadOnly)
+	                .WithIndexes(new BlogByIdIndex())
+	                .Build();
+	            var blog = new Blog
+	            {
+	                Title = "Future Time Saver Log",
+	                Author = "Gary Brunton",
+	                CreatedDate = DateTime.Now
+	            };
+
+	            // Act
+	            using (var repo = config.BuildRepository())
+	            {
+	                repo.Insert(blog);
+	            }
+
+	            deleteTestFiles();
+
+	            Blog blogFromIndex;
+	            Blog blogFromRepository;
+	            using (var repo = config.BuildRepository())
+	            {
+	                blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
+	                blogFromRepository = repo.GetAll<Blog>().Single();
+	                blogFromIndex.Author = "Not Gary Brunton";
+	                blogFromRepository.Author = "Still Not Gary Brunton";
+	            }
+
+	            deleteTestFiles();
+
+	            using (var repo = config.BuildRepository())
+	            {
+	                blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
+	                blogFromRepository = repo.GetAll<Blog>().Single();
+	            }
+
+                // Assert
+                Assert.AreEqual(blog.Id, blogFromIndex.Id);
+	            Assert.AreEqual(blog.Title, blogFromIndex.Title);
+	            Assert.AreEqual(blog.Author, blogFromIndex.Author);
+	            Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), blogFromIndex.CreatedDate.ToString("MM/dd/yyyy"));
+	            Assert.AreEqual(blog.ModifiedDate, blogFromIndex.ModifiedDate);
+
+	            Assert.AreEqual(blog.Id, blogFromRepository.Id);
+	            Assert.AreEqual(blog.Title, blogFromRepository.Title);
+	            Assert.AreEqual(blog.Author, blogFromRepository.Author);
+	            Assert.AreEqual(blog.CreatedDate.ToString("MM/dd/yyyy"), blogFromRepository.CreatedDate.ToString("MM/dd/yyyy"));
+	            Assert.AreEqual(blog.ModifiedDate, blogFromRepository.ModifiedDate);
+            }
+
+            [Test]
             public void the_data_can_be_persisted_and_a_NonUniqueIndex_can_be_retrieved()
             {
                 // Arrange

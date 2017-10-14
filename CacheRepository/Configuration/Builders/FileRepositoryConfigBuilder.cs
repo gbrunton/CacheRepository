@@ -14,7 +14,7 @@ using CacheRepository.Utils;
 
 namespace CacheRepository.Configuration.Builders
 {
-	public class FileRepositoryConfigBuilder
+    public class FileRepositoryConfigBuilder
 	{
 		private readonly string rootPathFolder;
 		private string fileExtension;
@@ -29,6 +29,7 @@ namespace CacheRepository.Configuration.Builders
 		private string fieldQualifier;
 		private Cache<Type, EntityPropertiesForFile> entityPropertiesForFiles;
 	    private string persistedDataPath;
+	    private PersistedDataAccess persistedDataAccess;
 
 	    public FileRepositoryConfigBuilder(string rootPathFolder)
 		{
@@ -42,6 +43,7 @@ namespace CacheRepository.Configuration.Builders
 			this.setIdStrategy = new SmartEntityIdSetter();
 			this.outputConventions = new List<IOutputConvention>();
 			this.entityPropertiesForFiles = new Cache<Type, EntityPropertiesForFile>();
+		    this.persistedDataAccess = PersistedDataAccess.ReadWrite;
 		}
 
 		public FileRepositoryConfig Build()
@@ -64,8 +66,9 @@ namespace CacheRepository.Configuration.Builders
 					InsertStrategy = this.insertStrategy,
 					NextIdStrategy = this.nextIdStrategy,
 					SetIdStrategy = this.setIdStrategy,
-                    PersistedDataPath = this.persistedDataPath
-				};
+                    PersistedDataPath = this.persistedDataPath,
+				    PersistedDataAccess = this.persistedDataAccess
+            };
 		}
 
 		public FileRepositoryConfigBuilder WithFileExtension(string newValue)
@@ -139,9 +142,10 @@ namespace CacheRepository.Configuration.Builders
 			return this;
 		}
 
-	    public FileRepositoryConfigBuilder WithPersistedDataPath(string newValue)
+	    public FileRepositoryConfigBuilder WithPersistedDataPath(string pathNewValue, PersistedDataAccess persistedDataAccessNewValue = PersistedDataAccess.ReadWrite)
 	    {
-	        this.persistedDataPath = newValue;
+	        this.persistedDataPath = pathNewValue;
+	        this.persistedDataAccess = persistedDataAccessNewValue;
 	        return this;
 	    }
 	}

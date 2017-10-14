@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CacheRepository.Configuration.Builders;
 using CacheRepository.Configuration.Configs;
 using CacheRepository.Indexes;
 using CacheRepository.Utils;
@@ -72,7 +73,9 @@ namespace CacheRepository.Repositories
 
             foreach (var item in this.IndexesCached.Value.ToDictionary())
             {
-                using (var fileStream = File.Create(Path.Combine(pathToIndexes, string.Format("{0}.dat", item.Key))))
+                var pathToFile = Path.Combine(pathToIndexes, string.Format("{0}.dat", item.Key));
+                if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
+                using (var fileStream = File.Create(pathToFile))
                 {
                     JsonSerializer.SerializeToStream(
                         new IndexContainer
@@ -88,7 +91,9 @@ namespace CacheRepository.Repositories
             Directory.CreateDirectory(pathToEntities);
             foreach (var item in this.EntitiesCached.Value.ToDictionary())
             {
-                using (var fileStream = File.Create(Path.Combine(pathToEntities, string.Format("{0}.dat", item.Key))))
+                var pathToFile = Path.Combine(pathToEntities, string.Format("{0}.dat", item.Key));
+                if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
+                using (var fileStream = File.Create(pathToFile))
                 {
                     JsonSerializer.SerializeToStream(
                         new EntityContainer

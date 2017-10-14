@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CacheRepository.Configuration.Builders;
 using CacheRepository.ConnectionResolvers;
 using CacheRepository.DisposeStrategies;
 using CacheRepository.FileEntityFactoryStrategies;
@@ -21,6 +22,7 @@ namespace CacheRepository.Configuration.Configs
 		public ISetIdStrategy SetIdStrategy { get; set; }
 		public IInsertStrategy InsertStrategy { get; set; }
 	    public string PersistedDataPath { get; set; }
+	    public PersistedDataAccess PersistedDataAccess { get; set; }
 
 	    public FileRepository BuildRepository()
 		{
