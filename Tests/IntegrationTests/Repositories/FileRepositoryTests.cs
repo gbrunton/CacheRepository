@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CacheRepository.Configuration.Builders;
+using CacheRepository.Configuration.Configs;
 using CacheRepository.OutputConventions;
 using CacheRepository.Utils;
 using NUnit.Framework;
@@ -94,7 +95,7 @@ namespace Tests.IntegrationTests.Repositories
 	            // Arrange
 	            deleteTestFiles();
 
-	            var config = new FileRepositoryConfigBuilder(".")
+	            FileRepositoryConfig getConfig() => new FileRepositoryConfigBuilder(".")
 	                .WithFileExtension(TestFileExtension)
 	                .WithFileDelimitor(",")
 	                .WithFieldQualifier("\"")
@@ -109,7 +110,7 @@ namespace Tests.IntegrationTests.Repositories
 	            };
 
 	            // Act
-	            using (var repo = config.BuildRepository())
+	            using (var repo = getConfig().BuildRepository())
 	            {
 	                repo.Insert(blog);
 	            }
@@ -118,7 +119,7 @@ namespace Tests.IntegrationTests.Repositories
 
 	            Blog blogFromIndex;
 	            Blog blogFromRepository;
-	            using (var repo = config.BuildRepository())
+	            using (var repo = getConfig().BuildRepository())
 	            {
 	                blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
 	                blogFromRepository = repo.GetAll<Blog>().Single();
@@ -128,7 +129,7 @@ namespace Tests.IntegrationTests.Repositories
 
 	            deleteTestFiles();
 
-	            using (var repo = config.BuildRepository())
+	            using (var repo = getConfig().BuildRepository())
 	            {
 	                blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
 	                blogFromRepository = repo.GetAll<Blog>().Single();
@@ -149,12 +150,58 @@ namespace Tests.IntegrationTests.Repositories
             }
 
             [Test]
+            public void the_data_can_be_persisted_and_when_retrieved_the_indexes_reference_instances_within_the_entities()
+            {
+                // Arrange
+                deleteTestFiles();
+
+                FileRepositoryConfig getConfig() => 
+                    new FileRepositoryConfigBuilder(".")
+                    .WithFileExtension(TestFileExtension)
+                    .WithFileDelimitor(",")
+                    .WithFieldQualifier("\"")
+                    .WithPersistedDataPath(PersistedDatapath, PersistedDataAccess.ReadOnly)
+                    .WithIndexes(new BlogByIdIndex())
+                    .Build();
+
+                var blog = new Blog
+                {
+                    Title = "Future Time Saver Log",
+                    Author = "Gary Brunton",
+                    CreatedDate = DateTime.Now
+                };
+
+                // Act
+                using (var repo = getConfig().BuildRepository())
+                {
+                    repo.Insert(blog);
+                }
+
+                deleteTestFiles();
+
+                Blog blogFromIndex;
+                Blog blogFromRepository;
+                using (var repo = getConfig().BuildRepository())
+                {
+                    blogFromIndex = repo.GetIndex<BlogByIdIndex>().Get(blog.Id);
+                    blogFromRepository = repo.GetAll<Blog>().Single();
+                }
+
+                blogFromRepository.Author = "Changed Name";
+
+                // Assert
+                Assert.AreEqual("Changed Name", blogFromRepository.Author);
+                Assert.AreEqual("Changed Name", blogFromIndex.Author);
+            }
+
+            [Test]
             public void the_data_can_be_persisted_and_a_NonUniqueIndex_can_be_retrieved()
             {
                 // Arrange
                 deleteTestFiles();
 
-                var config = new FileRepositoryConfigBuilder(".")
+                FileRepositoryConfig getConfig() =>
+                    new FileRepositoryConfigBuilder(".")
                     .WithFileExtension(TestFileExtension)
                     .WithFileDelimitor(",")
                     .WithFieldQualifier("\"")
@@ -169,7 +216,7 @@ namespace Tests.IntegrationTests.Repositories
                 };
 
                 // Act
-                using (var repo = config.BuildRepository())
+                using (var repo = getConfig().BuildRepository())
                 {
                     repo.Insert(blog);
                 }
@@ -177,7 +224,7 @@ namespace Tests.IntegrationTests.Repositories
                 deleteTestFiles();
 
                 IEnumerable<Blog> blogs;
-                using (var repo = config.BuildRepository())
+                using (var repo = getConfig().BuildRepository())
                 {
                     blogs = repo.GetIndex<BlogsByAuthorIndex>().Get(blog.Author);
                 }

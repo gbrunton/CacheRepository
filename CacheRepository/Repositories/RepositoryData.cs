@@ -20,23 +20,6 @@ namespace CacheRepository.Repositories
             this.repositoryConfig = repositoryConfig;
             if (!string.IsNullOrWhiteSpace(repositoryConfig.PersistedDataPath))
             {
-                this.IndexesCached = new Lazy<Cache<Type, IIndex>>(() =>
-                {
-                    var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "Indexes");
-                    if (!Directory.Exists(path)) return new Cache<Type, IIndex>(this.repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index => index));
-                    var cache = new Cache<Type, IIndex>();
-                    Directory.EnumerateFiles(path)
-                        .Each(fileName =>
-                        {
-                            using (var entityFileStream = File.OpenRead(fileName))
-                            {
-                                var indexContainer = JsonSerializer.DeserializeFromStream<IndexContainer>(entityFileStream);
-                                cache.Fill(indexContainer.Type, indexContainer.Index);
-                            }
-                        });
-                    return cache;
-                });
-
                 this.EntitiesCached = new Lazy<Cache<Type, List<dynamic>>>(() =>
                 {
                     var path = Path.Combine(this.repositoryConfig.PersistedDataPath, "Entities");
@@ -53,6 +36,28 @@ namespace CacheRepository.Repositories
                         });
                     return cache;
                 });
+
+                this.IndexesCached = new Lazy<Cache<Type, IIndex>>(() =>
+                {
+                    var indexCache = new Cache<Type, IIndex>(repositoryConfig.Indexes.ToDictionary(index => index.GetType(), index =>
+                    {
+                        index.Clear(); // Clear out any existing data in the index because we are going to build it back up here.
+                        return index;
+                    }));
+                    var cachedEntities = this.EntitiesCached.Value;
+
+                    foreach (var entry in cachedEntities.ToDictionary())
+                    {
+                        var entityType = entry.Key;
+                        var indexes = indexCache.Where(x => entityType == x.GetEntityType()).ToArray();
+                        foreach (var entity in entry.Value)
+                        {
+                            indexes.Each(index => index.Add(entity));
+                        }
+                    }
+
+                    return indexCache;
+                });
             }
             else
             {
@@ -67,25 +72,6 @@ namespace CacheRepository.Repositories
         public void Dispose()
         {
             if (string.IsNullOrWhiteSpace(this.repositoryConfig.PersistedDataPath)) return;
-
-            var pathToIndexes = Path.Combine(this.repositoryConfig.PersistedDataPath, "Indexes");
-            Directory.CreateDirectory(pathToIndexes);
-
-            foreach (var item in this.IndexesCached.Value.ToDictionary())
-            {
-                var pathToFile = Path.Combine(pathToIndexes, string.Format("{0}.dat", item.Key));
-                if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
-                using (var fileStream = File.Create(pathToFile))
-                {
-                    JsonSerializer.SerializeToStream(
-                        new IndexContainer
-                        {
-                            Type = item.Key,
-                            Index = item.Value
-                        }, fileStream);
-                }                
-
-            }
 
             var pathToEntities = Path.Combine(this.repositoryConfig.PersistedDataPath, "Entities");
             Directory.CreateDirectory(pathToEntities);
@@ -104,12 +90,6 @@ namespace CacheRepository.Repositories
                 }                
             }
         }
-    }
-
-    public class IndexContainer
-    {
-        public Type Type { get; set; }
-        public IIndex Index { get; set; }
     }
 
     public class EntityContainer
