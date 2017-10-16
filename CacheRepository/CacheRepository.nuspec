@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.5.9] Added the ability to declare a persistent storage as ReadOnly. See issue #14.
+    <releaseNotes>[1.5.10] Loading entites from persistent storage now builds up indexes directly from them. See issue #15
+[1.5.9] Added the ability to declare a persistent storage as ReadOnly. See issue #14.	
 [1.5.8] Fixed a bug related to finding duplicate entities based on a key.
 [1.5.7] Fixed a bug related to deserializing.
 [1.5.6] Optimizing the UniqueIndex.
