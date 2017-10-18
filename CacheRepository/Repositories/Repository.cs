@@ -20,7 +20,7 @@ namespace CacheRepository.Repositories
 		private readonly Cache<Type, dynamic> entityIds;
 	    private readonly Lazy<Cache<Type, string>> entitySqlCachedLazy;
 	    private readonly RepositoryData repositoryData;
-	    private readonly Lazy<Cache<string, IEnumerable<dynamic>>> queryCached;
+	    private readonly Lazy<Cache<string, QueryContainer>> queryCached;
 
         public Repository(IRepositoryConfig repositoryConfig)
 		{
@@ -35,9 +35,9 @@ namespace CacheRepository.Repositories
                 return entitySqlCached;
             });
 		    this.repositoryData = new RepositoryData(repositoryConfig);
-		    this.queryCached = new Lazy<Cache<string, IEnumerable<dynamic>>>(() =>
+		    this.queryCached = new Lazy<Cache<string, QueryContainer>>(() =>
 		    {
-		        var cache = new Cache<string, IEnumerable<dynamic>>(type => null);
+		        var cache = new Cache<string, QueryContainer>(type => null);
 		        if (!string.IsNullOrWhiteSpace(repositoryConfig.PersistedDataPath))
 		        {
 		            var pathToQueries = Path.Combine(this.repositoryConfig.PersistedDataPath, "Queries");
@@ -48,7 +48,7 @@ namespace CacheRepository.Repositories
 		                    using (var entityFileStream = File.OpenRead(fileName))
 		                    {
 		                        var entityContainer = JsonSerializer.DeserializeFromStream<QueryContainer>(entityFileStream);
-		                        cache.Fill(entityContainer.Key, entityContainer.QueryResults);
+		                        cache.Fill(entityContainer.Key, entityContainer);
 		                    }
 		                });
                 }
@@ -134,14 +134,19 @@ namespace CacheRepository.Repositories
 		{
 		    var key = $"{typeof(TEntity)}--{query}--{JsonSerializer.SerializeToString(parameters)}";
 		    var cachedValue = this.queryCached.Value;
-		    var queryResults = cachedValue[key];
+		    var queryContainer = cachedValue[key];
 
-		    if (queryResults != null) return queryResults.Cast<TEntity>();
+		    if (queryContainer != null) return queryContainer.QueryResults.Cast<TEntity>();
 
-		    queryResults = this.repositoryConfig.QueryStrategy.Query<TEntity>(query, parameters);
+		    queryContainer = new QueryContainer
+		    {
+		        Key = key,
+                FileName = $"{key.Split(new[] { "--" }, StringSplitOptions.RemoveEmptyEntries)[0]}-{Guid.NewGuid()}.dat",
+                QueryResults = this.repositoryConfig.QueryStrategy.Query<TEntity>(query, parameters)
+		    };
 
-		    cachedValue[key] = queryResults;
-		    return queryResults.Cast<TEntity>();
+		    cachedValue[key] = queryContainer;
+		    return queryContainer.QueryResults.Cast<TEntity>();
 		}
 
 		public void Commit()
@@ -181,16 +186,11 @@ namespace CacheRepository.Repositories
 		    Directory.CreateDirectory(pathToQueries);
 		    foreach (var item in this.queryCached.Value.ToDictionary())
 		    {
-		        var pathToFile = Path.Combine(pathToQueries, $"{item.Key.Split(new[] { "--" }, StringSplitOptions.RemoveEmptyEntries)[0]}-{Guid.NewGuid()}.dat");
-		        if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
+		        var pathToFile = Path.Combine(pathToQueries, item.Value.FileName);
+                if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
 		        using (var fileStream = File.Create(pathToFile))
 		        {
-		            JsonSerializer.SerializeToStream(
-		                new QueryContainer
-                        {
-		                    Key = item.Key,
-		                    QueryResults = item.Value
-		                }, fileStream);
+		            JsonSerializer.SerializeToStream(item.Value, fileStream);
 		        }
 		    }
         }
@@ -228,5 +228,6 @@ namespace CacheRepository.Repositories
     {
         public IEnumerable<dynamic> QueryResults { get; set; }
         public string Key { get; set; }
+        public string FileName { get; set; }
     }
 }

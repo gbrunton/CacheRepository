@@ -241,6 +241,44 @@ namespace Tests.UnitTests.Repositories
                 Assert.AreEqual(blogFromSubsequentCall.Title, "second");
             }
 
+            [Test]
+            public void and_persistent_caching_is_enabled_multiple_data_files_should_not_be_created_for_the_same_key()
+            {
+                // Arrange
+                const string query = "Select * From Blog Where Author = 'Gary Brunton';";
+                this.reporitoryConfig.PersistedDataPath = PersistedDatapath;
+                this.reporitoryConfig.QueryStrategy = new QueryStrategyFake
+                {
+                    Results = new[]
+                    {
+                        new Blog
+                        {
+                            Id = 1,
+                            Author = "Gary Brunton",
+                            Title = "first"
+                        }
+                    }
+                };
+
+                Blog blog;
+                using (var repository = getSut())
+                {
+                    blog = repository.Query<Blog>(query).Single();
+                }
+
+                // Act
+                Blog blogFromSubsequentCall;
+                using (var repository = getSut())
+                {
+                    blogFromSubsequentCall = repository.Query<Blog>(query).Single();
+                }
+
+                // Assert
+                Assert.AreEqual(blog.Id, blogFromSubsequentCall.Id);
+                Assert.AreEqual(blog.Title, blogFromSubsequentCall.Title);
+                Assert.AreEqual(1, Directory.GetFiles(Path.Combine(PersistedDatapath, "Queries")).Length);
+            }
+
             private static void deletePersistedData()
             {
                 Directory.GetFiles(PersistedDatapath).Each(File.Delete);

@@ -14,7 +14,8 @@ nuget pack CacheRepository.csproj
     <projectUrl>https://github.com/gbrunton/CacheRepository</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>[1.6.0] Ad hoc query results can now be persisted just like entities so they don't have to be fetched every time. See issue #16
+    <releaseNotes>[1.6.1] Fixed an issue with persisting ad hoc query results. See issue #17
+[1.6.0] Ad hoc query results can now be persisted just like entities so they don't have to be fetched every time. See issue #16
 [1.5.10] Loading entites from persistent storage now builds up indexes directly from them. See issue #15	
 [1.5.9] Added the ability to declare a persistent storage as ReadOnly. See issue #14.	
 [1.5.8] Fixed a bug related to finding duplicate entities based on a key.
