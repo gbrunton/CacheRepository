@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using CacheRepository.Behaviours;
+using CacheRepository.Configuration.Builders;
 using CacheRepository.Configuration.Configs;
 using CacheRepository.Indexes;
 using CacheRepository.Utils;
+using ServiceStack.Text;
 
 namespace CacheRepository.Repositories
 {
@@ -15,21 +18,45 @@ namespace CacheRepository.Repositories
 		private readonly IRepositoryConfig repositoryConfig;
 		private readonly Cache<Type, List<dynamic>> entitiesCachedForBulkInsert;
 		private readonly Cache<Type, dynamic> entityIds;
-		private readonly Cache<Type, string> entitySqlCached;
+	    private readonly Lazy<Cache<Type, string>> entitySqlCachedLazy;
 	    private readonly RepositoryData repositoryData;
+	    private readonly Lazy<Cache<string, IEnumerable<dynamic>>> queryCached;
 
-		public Repository(IRepositoryConfig repositoryConfig)
+        public Repository(IRepositoryConfig repositoryConfig)
 		{
 			if (repositoryConfig == null) throw new ArgumentNullException("repositoryConfig");
 			this.repositoryConfig = repositoryConfig;
-			this.entitySqlCached = new Cache<Type, string> {OnMissing = key => null};
 			this.entityIds = new Cache<Type, dynamic> { OnMissing = key => this.repositoryConfig.NextIdStrategy.GetNextId(key, () => this.GetAll(key).Max(x => x.Id)) };
 			this.entitiesCachedForBulkInsert = new Cache<Type, List<dynamic>> { OnMissing = typeOfEntity => new List<dynamic>() };
-			this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
+            this.entitySqlCachedLazy = new Lazy<Cache<Type, string>>(() =>
+            {
+                var entitySqlCached = new Cache<Type, string> { OnMissing = key => null };
+                this.repositoryConfig.CustomEntitySql.Each(x => entitySqlCached[x.Item1] = x.Item2);
+                return entitySqlCached;
+            });
 		    this.repositoryData = new RepositoryData(repositoryConfig);
+		    this.queryCached = new Lazy<Cache<string, IEnumerable<dynamic>>>(() =>
+		    {
+		        var cache = new Cache<string, IEnumerable<dynamic>>(type => null);
+		        if (!string.IsNullOrWhiteSpace(repositoryConfig.PersistedDataPath))
+		        {
+		            var pathToQueries = Path.Combine(this.repositoryConfig.PersistedDataPath, "Queries");
+		            if (!Directory.Exists(pathToQueries)) return cache;
+		            Directory.EnumerateFiles(pathToQueries)
+		                .Each(fileName =>
+		                {
+		                    using (var entityFileStream = File.OpenRead(fileName))
+		                    {
+		                        var entityContainer = JsonSerializer.DeserializeFromStream<QueryContainer>(entityFileStream);
+		                        cache.Fill(entityContainer.Key, entityContainer.QueryResults);
+		                    }
+		                });
+                }
+		        return cache;
+            });
 		}
 
-		public void BuilkInsertNonGeneric(object entity)
+        public void BuilkInsertNonGeneric(object entity)
 		{
 			var typeOfEntity = entity.GetType();
 			var methodInfo = typeof(Repository).GetMethods().First(x => x.Name == "BulkInsert");
@@ -103,9 +130,18 @@ namespace CacheRepository.Repositories
 			this.repositoryConfig.ExecuteSqlStrategy.Execute(sql, parameters);
 		}
 
-		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null) where TEntity : class 
+		public IEnumerable<TEntity> Query<TEntity>(string query, object parameters = null) where TEntity : class
 		{
-			return this.repositoryConfig.QueryStrategy.Query<TEntity>(query, parameters);
+		    var key = $"{typeof(TEntity)}--{query}--{JsonSerializer.SerializeToString(parameters)}";
+		    var cachedValue = this.queryCached.Value;
+		    var queryResults = cachedValue[key];
+
+		    if (queryResults != null) return queryResults.Cast<TEntity>();
+
+		    queryResults = this.repositoryConfig.QueryStrategy.Query<TEntity>(query, parameters);
+
+		    cachedValue[key] = queryResults;
+		    return queryResults.Cast<TEntity>();
 		}
 
 		public void Commit()
@@ -136,18 +172,37 @@ namespace CacheRepository.Repositories
 
 		public void Dispose()
 		{
-			this.repositoryConfig.DisposeStrategy.Dispose();
+			this.repositoryConfig.DisposeStrategy?.Dispose();
 		    this.repositoryData.Dispose();
-		}
 
-		private List<dynamic> getAllWithGeneric<TEntity>() where TEntity : class 
+		    if (string.IsNullOrWhiteSpace(this.repositoryConfig.PersistedDataPath)) return;
+
+		    var pathToQueries = Path.Combine(this.repositoryConfig.PersistedDataPath, "Queries");
+		    Directory.CreateDirectory(pathToQueries);
+		    foreach (var item in this.queryCached.Value.ToDictionary())
+		    {
+		        var pathToFile = Path.Combine(pathToQueries, $"{item.Key.Split(new[] { "--" }, StringSplitOptions.RemoveEmptyEntries)[0]}-{Guid.NewGuid()}.dat");
+		        if (this.repositoryConfig.PersistedDataAccess == PersistedDataAccess.ReadOnly && File.Exists(pathToFile)) continue;
+		        using (var fileStream = File.Create(pathToFile))
+		        {
+		            JsonSerializer.SerializeToStream(
+		                new QueryContainer
+                        {
+		                    Key = item.Key,
+		                    QueryResults = item.Value
+		                }, fileStream);
+		        }
+		    }
+        }
+
+        private List<dynamic> getAllWithGeneric<TEntity>() where TEntity : class 
 		{
 			var type = typeof(TEntity);
             this.repositoryData.EntitiesCached.Value.OnMissing = key =>
 			{
 				var all = this.repositoryConfig
 					.EntityRetrieverStrategy
-					.GetAll<TEntity>(this.entitySqlCached[type]);
+				    .GetAll<TEntity>(this.entitySqlCachedLazy.Value[type]);
                 var typeIndexes = this.repositoryData.IndexesCached.Value.Where(x => type == x.GetEntityType());
 				var returnList = new List<dynamic>();
 				all.Each(entity =>
@@ -168,4 +223,10 @@ namespace CacheRepository.Repositories
 			return (List<dynamic>)generic.Invoke(this, null);
 		}
 	}
+
+    public class QueryContainer
+    {
+        public IEnumerable<dynamic> QueryResults { get; set; }
+        public string Key { get; set; }
+    }
 }

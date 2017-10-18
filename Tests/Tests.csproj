@@ -53,6 +53,7 @@
     <Compile Include="Entities\Blog.cs" />
     <Compile Include="Entities\BlogWithAttribute.cs" />
     <Compile Include="Entities\BlogWithStringOnlyProperties.cs" />
+    <Compile Include="Fakes\QueryStrategyFake.cs" />
     <Compile Include="Indexes\BlogByIdTitle.cs" />
     <Compile Include="Indexes\BlogByIdIndex.cs" />
     <Compile Include="Indexes\BlogsByAuthorIndex.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="UnitTests\InsertStrategies\FileInsertTestFixture.cs" />
     <Compile Include="UnitTests\NextIdStrategies\SmartNextIdRetreiverTestFixture.cs" />
     <Compile Include="UnitTests\OutputConventions\DateTimeToyyyyMMddTestFixture.cs" />
+    <Compile Include="UnitTests\Repositories\RepositoryTestFixture.cs" />
     <Compile Include="UnitTests\Utils\StringExtensionsTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
