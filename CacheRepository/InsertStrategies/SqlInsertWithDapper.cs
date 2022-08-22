@@ -1,53 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using CacheRepository.ConnectionResolvers;
-using DapperExtensions;
-using DapperExtensions.Mapper;
+using CacheRepository.ExecuteSqlStrategies;
+using SqlKata;
+using SqlKata.Compilers;
 
 namespace CacheRepository.InsertStrategies
 {
-	public class SqlInsertWithDapper : IInsertStrategy
-	{
-		private readonly ISqlConnectionResolver connectionResolver;
+    public class SqlInsertWithDapper : IInsertStrategy
+    {
+        private readonly IExecuteSqlStrategy executeSqlStrategy;
+        private readonly SqlServerCompiler sqlServerCompiler;
+        private readonly Dictionary<Type, string> cachedSql;
 
-		public SqlInsertWithDapper(ISqlConnectionResolver connectionResolver)
-		{
-			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
-			this.connectionResolver = connectionResolver;
-		}
+        public SqlInsertWithDapper(IExecuteSqlStrategy executeSqlStrategy)
+        {
+            this.executeSqlStrategy = executeSqlStrategy ?? throw new ArgumentNullException(nameof(executeSqlStrategy));
+            this.sqlServerCompiler = new SqlServerCompiler();
+            this.cachedSql = new Dictionary<Type, string>();
+        }
 
-		public void Insert<TEntity>(TEntity entity) where TEntity : class
-		{
-			var defaultMapper = DapperExtensions.DapperExtensions.DefaultMapper;
-			DapperExtensions.DapperExtensions.DefaultMapper = typeof(EntityIdIsAssigned<>);
-			this.connectionResolver
-				.GetConnection()
-				.Insert(entity, this.connectionResolver.GetTransaction(), 0);
-			DapperExtensions.DapperExtensions.DefaultMapper = defaultMapper;
-		}
-	}
+        public void Insert<TEntity>(TEntity entity) where TEntity : class
+        {
+            var entityType = entity.GetType();
 
-	public class EntityIdIsAssigned<TEntityWithId> : AutoClassMapper<TEntityWithId> where TEntityWithId : class
-	{
-		protected override void AutoMap()
-		{
-			var type = typeof(TEntityWithId);
-			var keyFound = Properties.Any(p => p.KeyType != KeyType.NotAKey);
-			foreach (var propertyInfo in type.GetProperties())
-			{
-				if (Properties.Any(p => p.Name.Equals(propertyInfo.Name, StringComparison.InvariantCultureIgnoreCase)))
-				{
-					continue;
-				}
+            if (!this.cachedSql.TryGetValue(entityType, out var sql))
+            {
+                var idProperty = entityType.GetProperties()
+                    .SingleOrDefault(x => x.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase));
+                if (idProperty == null)
+                    throw new Exception(
+                        $"Entity '{entityType.Name}' does not have an Id property so an update cannot be made.");
+                var query = new Query(entityType.Name).AsInsert(entity);
+                sql = this.sqlServerCompiler.Compile(query).Sql;
+                this.cachedSql.Add(entityType, sql);
+            }
 
-				var map = Map(propertyInfo);
-
-				if (!keyFound && string.Equals(map.PropertyInfo.Name, "Id", StringComparison.InvariantCultureIgnoreCase))
-				{
-					map.Key(KeyType.Assigned);
-					keyFound = true;
-				}
-			}
-		}
-	}
+            this.executeSqlStrategy.Execute(sql, entity);
+        }
+    }
 }

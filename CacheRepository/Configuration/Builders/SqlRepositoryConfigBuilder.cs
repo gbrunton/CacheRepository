@@ -59,8 +59,8 @@ namespace CacheRepository.Configuration.Builders
 			this.commitStrategy = this.commitStrategy ?? new CommitSqlConnection(connectionResolver);
             this.entityRetrieverStrategy = this.entityRetrieverStrategy ?? new SqlEntityRetrieverStrategy(connectionResolver, this.sqlQualifiers, this.overriddenDefaultGetAllQueryStrategy);
 			this.executeSqlStrategy = this.executeSqlStrategy ?? new ExecuteSqlWithDapper(connectionResolver);
-			this.insertStrategy = this.insertStrategy ?? new SqlInsertWithDapper(connectionResolver);
-			this.updateStrategy = this.updateStrategy ?? new SqlUpdateWithDapper(connectionResolver);
+			this.insertStrategy = this.insertStrategy ?? new SqlInsertWithDapper(new ExecuteSqlWithDapper(connectionResolver));
+			this.updateStrategy = this.updateStrategy ?? new SqlUpdateWithDapper(new ExecuteSqlWithDapper(connectionResolver));
 			this.queryStrategy = this.queryStrategy ?? new QueryWithDapper(connectionResolver);
 			this.disposeStrategy = this.disposeStrategy ?? new DisposeConnectionResolver(connectionResolver);
 			return new SqlRepositoryConfig

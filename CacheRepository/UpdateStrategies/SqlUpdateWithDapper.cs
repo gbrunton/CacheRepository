@@ -1,26 +1,41 @@
 ﻿using System;
-using CacheRepository.ConnectionResolvers;
-using DapperExtensions;
+using System.Collections.Generic;
+using System.Linq;
+using CacheRepository.ExecuteSqlStrategies;
+using SqlKata;
+using SqlKata.Compilers;
 
 namespace CacheRepository.UpdateStrategies
 {
 	public class SqlUpdateWithDapper : IUpdateStrategy
 	{
-		private readonly ISqlConnectionResolver connectionResolver;
+        private readonly IExecuteSqlStrategy executeSqlStrategy;
+        private readonly SqlServerCompiler sqlServerCompiler;
+        private readonly Dictionary<Type, string> cachedSql;
 
-		public SqlUpdateWithDapper(ISqlConnectionResolver connectionResolver)
-		{
-			if (connectionResolver == null) throw new ArgumentNullException("connectionResolver");
-			this.connectionResolver = connectionResolver;
-		}
+        public SqlUpdateWithDapper(IExecuteSqlStrategy executeSqlStrategy)
+        {
+            this.executeSqlStrategy = executeSqlStrategy ?? throw new ArgumentNullException(nameof(executeSqlStrategy));
+            this.sqlServerCompiler = new SqlServerCompiler();
+            this.cachedSql = new Dictionary<Type, string>();
+        }
 
 		public void Update<TEntity>(TEntity entity) where TEntity : class
-		{
-			// what happens if an indexed property gets updated???
-			// See Issue #2
-			this.connectionResolver
-				.GetConnection()
-				.Update(entity, this.connectionResolver.GetTransaction());
-		}
+        {
+            var entityType = entity.GetType();
+
+            if (!this.cachedSql.TryGetValue(entityType, out var sql))
+            {
+                var idProperty = entityType.GetProperties().SingleOrDefault(x => x.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase));
+                if (idProperty == null) throw new Exception($"Entity '{entityType.Name}' does not have an Id property so an update cannot be made.");
+                var query = new Query(entityType.Name)
+                    .Where("Id", idProperty.GetValue(entity))
+                    .AsUpdate(entity);
+                sql = this.sqlServerCompiler.Compile(query).Sql;
+                this.cachedSql.Add(entityType, sql);
+            }
+
+            this.executeSqlStrategy.Execute(sql, entity);
+        }
 	}
 }
